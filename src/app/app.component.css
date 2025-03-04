@@ -164,10 +164,9 @@
   }
   
   .container {
-    border: 1px solid var(--line-clr);
+    /* border: 1px solid var(--line-clr); */
     border-radius: 1em;
     padding: min(3em, 15%);
-    height: 100dvh;
   
     h2,
     p {
