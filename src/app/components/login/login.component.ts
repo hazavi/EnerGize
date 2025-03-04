@@ -6,13 +6,13 @@ import {
   Validators,
 } from '@angular/forms';
 import { LoginModel } from '../../models/loginmodel';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { GenericService } from '../../service/generic.service';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-login',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })

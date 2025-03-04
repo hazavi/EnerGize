@@ -1,0 +1,38 @@
+  <!-- Register Page -->
+  <div class="auth-container">
+    <div class="auth-box">
+      <h2 class="auth-title">Register</h2>
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form">
+        <div class="form-group">
+          <label for="username">Username:</label>
+          <input type="text" id="username" formControlName="username" class="form-control" required />
+          <div *ngIf="registerForm.get('username')?.invalid && (registerForm.get('username')?.dirty || registerForm.get('username')?.touched)" class="error-message">
+            Username must be at least 3 characters long.
+          </div>
+        </div>
+  
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input type="email" id="email" formControlName="email" class="form-control" required />
+          <div *ngIf="registerForm.get('email')?.invalid && (registerForm.get('email')?.dirty || registerForm.get('email')?.touched)" class="error-message">
+            Please enter a valid email address.
+          </div>
+        </div>
+  
+        <div class="form-group">
+          <label for="password">Password:</label>
+          <input type="password" id="password" formControlName="password" class="form-control" required />
+          <div *ngIf="registerForm.get('password')?.invalid && (registerForm.get('password')?.dirty || registerForm.get('password')?.touched)" class="error-message">
+            Password must be at least 6 characters long.
+          </div>
+        </div>
+  
+        <button type="submit" class="auth-button" [disabled]="registerForm.invalid">Register</button>
+      </form>
+  
+      <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+      <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+  
+      <p class="auth-link">Already have an account? <a routerLink="/login" class="link">Login here</a>.</p>
+    </div>
+  </div>

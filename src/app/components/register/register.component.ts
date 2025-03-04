@@ -1,14 +1,18 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { GenericService } from '../../../service/generic.service';
-import { RegisterModel } from '../../../models/registermodel';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
+import { GenericService } from '../../service/generic.service';
+import { RegisterModel } from '../../models/registermodel';
 import { CommonModule } from '@angular/common';
-
 
 @Component({
   selector: 'app-register',
-    imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css'],
 })
