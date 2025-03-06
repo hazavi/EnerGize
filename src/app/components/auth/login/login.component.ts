@@ -5,10 +5,11 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { LoginModel } from '../../models/loginmodel';
+import { LoginModel } from '../../../models/loginmodel';
 import { Router, RouterModule } from '@angular/router';
-import { GenericService } from '../../service/generic.service';
+import { GenericService } from '../../../service/generic.service';
 import { CommonModule } from '@angular/common';
+import { LoginResponse } from '../../../models/loginresponse';
 
 @Component({
   selector: 'app-login',
@@ -44,13 +45,15 @@ export class LoginComponent {
 
     this.genericService.login(loginData).subscribe(
       (response: any) => {
-        this.successMessage = 'Login successful!';
-        this.errorMessage = '';
         console.log('User logged in:', response);
 
-        // Store token or user info in localStorage/sessionStorage if needed
-        localStorage.setItem('authToken', response.Token); // Assuming the API returns a token
-        this.router.navigate(['/home']); // Redirect to home after login
+        // Save the entire login response as JSON in localStorage
+        localStorage.setItem('loginResponse', JSON.stringify(response));
+
+        // Navigate to home without reloading the page
+        this.router.navigate(['/home']).then(() => {
+          window.location.reload();
+        });
       },
       (error: any) => {
         this.errorMessage = 'Invalid credentials or an error occurred.';

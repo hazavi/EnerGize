@@ -1,14 +1,4 @@
 /* General Styles */
-body {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f8f9fa;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
 
 .auth-container {
   display: flex;
@@ -19,7 +9,8 @@ body {
 }
 
 .auth-box {
-  background: #ffffff;
+  background-color: var(--card-clr);
+  color: var(--text-clr);
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 30px;
@@ -32,7 +23,6 @@ body {
   font-size: 24px;
   font-weight: bold;
   margin-bottom: 20px;
-  color: #333;
 }
 
 .auth-form {
@@ -48,13 +38,12 @@ body {
 label {
   font-size: 14px;
   font-weight: bold;
-  color: #555;
   margin-bottom: 5px;
   display: block;
 }
 
 .form-control {
-  width: 100%;
+  width: 95%;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -75,11 +64,12 @@ label {
 
 .auth-button {
   background-color: #007bff;
-  color: #fff;
+  color: var(--text-clr);
   border: none;
   padding: 10px;
+  margin: 15px 0;
   border-radius: 5px;
-  font-size: 16px;
+  font-size: 1em;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
@@ -114,12 +104,12 @@ label {
 
 .auth-link {
   margin-top: 15px;
-  font-size: 14px;
-  color: #555;
+  font-size: 0.85em;
 }
 .auth-link:hover {
   cursor: pointer;
 }
+
 .link {
   color: #007bff;
   text-decoration: none;

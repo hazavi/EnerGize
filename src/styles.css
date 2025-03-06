@@ -6,6 +6,7 @@
     --text-clr: #e6e6ef;
     --accent-clr: #5e63ff;
     --secondary-text-clr: #b0b3c1;
+    --card-clr: #1e1e25bc;
   }
 body {
   font-family: Poppins, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;

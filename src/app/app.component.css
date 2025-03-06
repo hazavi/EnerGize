@@ -247,3 +247,71 @@
       }
     }
   }
+  #sidebar ul {
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+    height: 100%; /* Ensure the list takes up the full height of the sidebar */
+  }
+  
+  #sidebar ul li:last-child {
+    margin-top: auto; /* Push the last item (login) to the bottom */
+    padding-bottom: 20px;
+  }
+
+/* Submenu styling */
+#profile-submenu {
+  display: none; /* Hidden by default */
+  position: absolute;
+  bottom: 150%; /* Position above the profile link */
+  left: 0; /* Align with the left edge of the parent */
+  background-color: var(--base-clr); /* Match the sidebar background */
+  border: 1px solid var(--line-clr); /* Add a subtle border */
+  border-radius: 0.5em; /* Rounded corners */
+  list-style: none;
+  padding: 0.8em 0; /* Increased vertical padding for better spacing */
+  margin: 0;
+  z-index: 1000; /* Ensure it appears above other elements */
+  box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow above */
+  min-width: 200px; /* Set a fixed width for consistency */
+  min-height: 100px;
+  font-size: 0.9rem; /* Adjust font size for readability */
+  overflow: hidden; /* Prevent content from overflowing */
+}
+
+/* Submenu items */
+#profile-submenu li {
+  margin: 0;
+}
+
+/* Styling for submenu links and buttons */
+#profile-submenu li a,
+#profile-submenu li button {
+  text-decoration: none;
+  color: var(--text-clr);
+  background-color: transparent;
+  padding: 0.7em 1em; /* Slightly increased padding for taller buttons */
+  border: none; /* Remove default button borders */
+  border-radius: 0.3em; /* Slightly rounded corners */
+  cursor: pointer;
+  display: block;
+  text-align: left;
+  transition: background-color 200ms ease-in-out, color 200ms ease-in-out; /* Smooth transitions */
+  font-weight: 500; /* Slightly bold text for emphasis */
+  width: 100%; /* Full width for consistency */
+  box-sizing: border-box; /* Ensure padding doesn't affect width */
+}
+
+/* Hover effects */
+#profile-submenu li a:hover,
+#profile-submenu li button:hover {
+  background-color: var(--hover-clr); /* Highlight on hover */
+  color: var(--accent-clr); /* Change text color for contrast */
+}
+
+/* Active/focused state */
+#profile-submenu li a:focus,
+#profile-submenu li button:focus {
+  outline: none; /* Remove default focus outline */
+  background-color: var(--hover-clr); /* Highlight when focused */
+  color: var(--accent-clr); /* Change text color for contrast */
+}

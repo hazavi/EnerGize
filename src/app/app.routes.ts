@@ -3,8 +3,8 @@ import { ExercisesComponent } from './components/exercises/exercises.component';
 import { HomeComponent } from './components/home/home.component';
 import { PlansComponent } from './components/plans/plans.component';
 import { ApplicationConfig } from '@angular/core';
-import { RegisterComponent } from './components/register/register.component';
-import { LoginComponent } from './components/login/login.component';
+import { RegisterComponent } from './components/auth/register/register.component';
+import { LoginComponent } from './components/auth/login/login.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' }, // Default redirect to home
