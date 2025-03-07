@@ -1,6 +1,7 @@
-export class LoginResponse {
-  userId: string = '';
-  username: string = '';
-  email: string = '';
-  role: string = '';
+export interface LoginResponse {
+  userId: string;
+  username: string;
+  email: string;
+  role: string;
+  token: string;
 }

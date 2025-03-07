@@ -20,6 +20,7 @@ export class RegisterComponent {
   registerForm: FormGroup;
   errorMessage: string = '';
   successMessage: string = '';
+  showPassword: boolean = false; // Controls password visibility
 
   constructor(
     private fb: FormBuilder,
@@ -31,6 +32,10 @@ export class RegisterComponent {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword; // Toggle password visibility
   }
 
   onSubmit() {

@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Router, RouterModule, RouterOutlet } from '@angular/router';
+import { User } from './models/user';
+import { LoginResponse } from './models/loginresponse';
 
 @Component({
   selector: 'app-root',
@@ -12,47 +14,63 @@ import { Router, RouterModule, RouterOutlet } from '@angular/router';
 export class AppComponent {
   title = 'EnerGize';
   isCollapsed = false;
+  username: string | null = null; // Stores the username
+  userId: string | null = null; // Stores the user ID
+  isUserAdmin: boolean = false; // Indicates if the user is an admin
+  loginResponse: LoginResponse | null = null; // Stores the parsed login response
+  isProfileMenuOpen = false; // Controls submenu visibility
 
   constructor(private router: Router) {}
 
   ngOnInit() {
-    this.updateProfileUI();
+    this.updateProfileUI(); // Update UI based on login status
   }
 
   toggleSidebar() {
     this.isCollapsed = !this.isCollapsed;
   }
 
+  // Toggle profile submenu visibility
+  toggleProfileMenu() {
+    this.isProfileMenuOpen = !this.isProfileMenuOpen;
+  }
+
   // Update the UI based on login status
   updateProfileUI() {
-    const profileText = document.getElementById('profile-text');
-    const profileSubmenu = document.getElementById('profile-submenu');
-
     const loginResponse = localStorage.getItem('loginResponse');
     if (loginResponse) {
-      const userData = JSON.parse(loginResponse);
-      const username = userData.user?.username || 'Profile'; // Access the username from the user object
-      profileText!.textContent = username;
+      // Parse the login response from localStorage
+      this.loginResponse = JSON.parse(loginResponse);
 
-      // Show submenu on profile click
-      document.getElementById('profile-link')!.addEventListener('click', () => {
-        profileSubmenu!.style.display =
-          profileSubmenu!.style.display === 'block' ? 'none' : 'block';
-      });
+      // Assign values to component properties
+      this.username = this.loginResponse?.username || 'Profile';
+      this.userId = this.loginResponse?.userId || null;
 
-      // Handle logout
-      document.getElementById('logout-btn')!.addEventListener('click', () => {
-        this.logout();
-      });
+      // Check if the user is an admin
+      this.isUserAdmin = this.isAdmin();
     } else {
-      profileText!.textContent = 'Login'; // Default to "Login"
-      profileSubmenu!.style.display = 'none'; // Hide submenu
+      // Reset UI for logged-out state
+      this.username = null;
+      this.userId = null;
+      this.isUserAdmin = false;
+      this.loginResponse = null;
+      this.isProfileMenuOpen = false; // Ensure submenu is closed
     }
+  }
+
+  // Check if the user is an admin
+  isAdmin(): boolean {
+    return this.loginResponse?.role === 'admin'; // Check the role from loginResponse
   }
 
   // Logout function
   logout() {
     localStorage.clear(); // Clear all localStorage data
+    this.username = null;
+    this.userId = null;
+    this.isUserAdmin = false;
+    this.loginResponse = null;
+    this.isProfileMenuOpen = false; // Close submenu
     this.updateProfileUI(); // Reset UI
     this.router.navigate(['/login']).then(() => {
       window.location.reload();

@@ -21,6 +21,8 @@ export class LoginComponent {
   loginForm: FormGroup;
   errorMessage: string = '';
   successMessage: string = '';
+  showPassword: boolean = false; // Controls password visibility
+  loginResponse: LoginResponse | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -33,24 +35,37 @@ export class LoginComponent {
     });
   }
 
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword; // Toggle password visibility
+  }
+
   onSubmit() {
     if (this.loginForm.invalid) {
       return;
     }
-
+  
     const loginData: LoginModel = {
       email: this.loginForm.value.email,
       password: this.loginForm.value.password,
     };
-
+  
     this.genericService.login(loginData).subscribe(
       (response: any) => {
         console.log('User logged in:', response);
-
+  
+        // Map the API response to the LoginResponse interface
+        this.loginResponse = {
+          userId: response.user.id, // Extract user ID from the response
+          username: response.user.username, // Extract username from the response
+          email: response.user.email, // Extract email from the response
+          role: response.role, // Extract role from the response
+          token: response.token, // Extract token from the response
+        };
+  
         // Save the entire login response as JSON in localStorage
-        localStorage.setItem('loginResponse', JSON.stringify(response));
-
-        // Navigate to home without reloading the page
+        localStorage.setItem('loginResponse', JSON.stringify(this.loginResponse));
+        
+        // Navigate to home 
         this.router.navigate(['/home']).then(() => {
           window.location.reload();
         });
