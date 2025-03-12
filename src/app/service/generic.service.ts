@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -11,7 +12,7 @@ const httpOptions = {
   providedIn: 'root',
 })
 export class GenericService<Model> {
-  private readonly url: string = 'https://energizeapi.azurewebsites.net/api';
+  private readonly url: string = environment.apiUrl;;
 
   constructor(private http: HttpClient) {}
 
