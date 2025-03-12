@@ -5,6 +5,8 @@ import { PlansComponent } from './components/plans/plans.component';
 import { ApplicationConfig } from '@angular/core';
 import { RegisterComponent } from './components/auth/register/register.component';
 import { LoginComponent } from './components/auth/login/login.component';
+import { AdminComponent } from './components/auth/admin/admin.component';
+import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' }, // Default redirect to home
@@ -14,4 +16,5 @@ export const routes: Routes = [
 
   { path: 'login', component: LoginComponent }, // Register Page
   { path: 'register', component: RegisterComponent }, // Register Page
+  { path: 'admin', component: AdminComponent, canActivate: [adminGuard]  }, // Admin Page
 ];

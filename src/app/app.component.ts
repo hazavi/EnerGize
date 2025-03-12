@@ -47,7 +47,7 @@ export class AppComponent {
       this.userId = this.loginResponse?.userId || null;
 
       // Check if the user is an admin
-      this.isUserAdmin = this.isAdmin();
+      this.isUserAdmin = this.loginResponse?.role === 'admin';
     } else {
       // Reset UI for logged-out state
       this.username = null;

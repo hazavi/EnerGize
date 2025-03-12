@@ -23,7 +23,8 @@ export class LoginComponent {
   successMessage: string = '';
   showPassword: boolean = false; // Controls password visibility
   loginResponse: LoginResponse | null = null;
-
+  isLoggedIn: boolean = false;
+  
   constructor(
     private fb: FormBuilder,
     private genericService: GenericService<LoginModel>,
@@ -35,6 +36,12 @@ export class LoginComponent {
     });
   }
 
+  checkLoginStatus() {
+    this.isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    if (this.isLoggedIn) {
+      this.router.navigate(['/home']);
+    }
+  }
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword; // Toggle password visibility
   }
@@ -64,7 +71,8 @@ export class LoginComponent {
   
         // Save the entire login response as JSON in localStorage
         localStorage.setItem('loginResponse', JSON.stringify(this.loginResponse));
-        
+        localStorage.setItem('isLoggedIn', 'true')
+
         // Navigate to home 
         this.router.navigate(['/home']).then(() => {
           window.location.reload();
