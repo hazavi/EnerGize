@@ -125,7 +125,6 @@ label {
   position: relative;
   display: flex;
   align-items: center;
-  
 }
 
 .input-with-icon .icon {
@@ -134,10 +133,14 @@ label {
   font-size: 1.1em;
   color: #6d6d6d;
   cursor: text;
-
-
 }
 .input-with-icon .password-icon {
   cursor: pointer;
+}
 
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
 }

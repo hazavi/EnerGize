@@ -3,6 +3,7 @@
   <div class="auth-box">
     <h2 class="auth-title">Welcome Back</h2>
     <p class="subtitle">Please enter your details to sign in</p>
+    <app-loading *ngIf="isLoading"></app-loading>
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
       <!-- Email Field -->
       <div class="form-group">
@@ -39,7 +40,7 @@
         </div>
       </div>
 
-      <button type="submit" class="auth-button" [disabled]="loginForm.invalid">Login
+      <button type="submit" class="auth-button" [disabled]="loginForm.invalid || isLoading">Login
         <i class="fa-solid fa-arrow-right"></i>
       </button>
     </form>

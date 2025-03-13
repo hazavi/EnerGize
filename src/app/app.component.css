@@ -272,7 +272,7 @@ main {
   z-index: 1000; /* Ensure it appears above other elements */
   box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow above */
   min-width: 200px; /* Set a fixed width for consistency */
-  min-height: 100px;
+  min-height: 150px; /* Increased height to fit both buttons */
   font-size: 0.9rem; /* Adjust font size for readability */
   overflow: hidden; /* Prevent content from overflowing */
 }
@@ -284,7 +284,8 @@ main {
 
 /* Styling for submenu links and buttons */
 #profile-submenu li a,
-#profile-submenu li button {
+#profile-submenu li button,
+#profile-submenu li #logout-btn {
   text-decoration: none;
   color: var(--text-clr);
   background-color: transparent;
@@ -292,8 +293,9 @@ main {
   border: none; /* Remove default button borders */
   border-radius: 0.3em; /* Slightly rounded corners */
   cursor: pointer;
-  display: block;
-  text-align: left;
+  display: flex; /* Use flexbox for alignment */
+  align-items: center; /* Center items vertically */
+  gap: 0.5em; /* Space between icon and text */
   transition: background-color 200ms ease-in-out, color 200ms ease-in-out; /* Smooth transitions */
   font-weight: 500; /* Slightly bold text for emphasis */
   width: 100%; /* Full width for consistency */
@@ -302,14 +304,16 @@ main {
 
 /* Hover effects */
 #profile-submenu li a:hover,
-#profile-submenu li button:hover {
+#profile-submenu li button:hover,
+#profile-submenu li #logout-btn:hover {
   background-color: var(--hover-clr); /* Highlight on hover */
   color: var(--accent-clr); /* Change text color for contrast */
 }
 
 /* Active/focused state */
 #profile-submenu li a:focus,
-#profile-submenu li button:focus {
+#profile-submenu li button:focus,
+#profile-submenu li #logout-btn:focus {
   outline: none; /* Remove default focus outline */
   background-color: var(--hover-clr); /* Highlight when focused */
   color: var(--accent-clr); /* Change text color for contrast */

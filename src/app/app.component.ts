@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Router, RouterModule, RouterOutlet } from '@angular/router';
-import { User } from './models/user';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { LoadingComponent } from './components/loading/loading.component';
 import { LoginResponse } from './models/loginresponse';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, RouterModule],
+  imports: [RouterOutlet, CommonModule, RouterModule, LoadingComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
@@ -19,8 +20,9 @@ export class AppComponent {
   isUserAdmin: boolean = false; // Indicates if the user is an admin
   loginResponse: LoginResponse | null = null; // Stores the parsed login response
   isProfileMenuOpen = false; // Controls submenu visibility
+  isLoading: boolean = false; // Loading state
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private snackBar: MatSnackBar) {}
 
   ngOnInit() {
     this.updateProfileUI(); // Update UI based on login status
@@ -65,6 +67,7 @@ export class AppComponent {
 
   // Logout function
   logout() {
+    this.isLoading = true;
     localStorage.clear(); // Clear all localStorage data
     this.username = null;
     this.userId = null;
@@ -72,8 +75,17 @@ export class AppComponent {
     this.loginResponse = null;
     this.isProfileMenuOpen = false; // Close submenu
     this.updateProfileUI(); // Reset UI
-    this.router.navigate(['/login']).then(() => {
-      window.location.reload();
-    }); // Redirect to login page
+
+    setTimeout(() => {
+      this.router.navigate(['/login']).then(() => {
+        this.isLoading = false;
+        this.snackBar.open('You have been logged out!', '', {
+          duration: 3000,
+          verticalPosition: 'top',
+          horizontalPosition: 'center',
+          panelClass: ['danger-snackbar'],
+        });
+      });
+    }, 2000); 
   }
 }
