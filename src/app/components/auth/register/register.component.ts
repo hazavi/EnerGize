@@ -9,6 +9,7 @@ import { Router, RouterModule } from '@angular/router';
 import { GenericService } from '../../../service/generic.service';
 import { RegisterModel } from '../../../models/registermodel';
 import { CommonModule } from '@angular/common';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-register',
@@ -25,7 +26,9 @@ export class RegisterComponent {
   constructor(
     private fb: FormBuilder,
     private genericService: GenericService<RegisterModel>,
-    private router: Router
+    private router: Router,
+    private snackBar: MatSnackBar
+
   ) {
     this.registerForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
@@ -51,10 +54,23 @@ export class RegisterComponent {
 
     this.genericService.register(registerData).subscribe(
       (response: any) => {
-        this.successMessage = 'Registration successful! Please log in.';
         this.errorMessage = '';
-        console.log('User registered:', response);
-        this.router.navigate(['/login']); // Redirect to login after registration
+        // Show success snackbar
+        const snackBarRef = this.snackBar.open(
+          'Registered successfully!',
+          '',
+          {
+            duration: 1500,
+            verticalPosition: 'top',
+            horizontalPosition: 'center',
+            panelClass: ['success-snackbar'],
+          }
+        );
+        snackBarRef.afterDismissed().subscribe(() => {
+          this.router.navigate(['/login']).then(() => {
+            window.location.reload();
+          });
+        });    
       },
       (error: any) => {
         this.errorMessage = 'An error occurred during registration.';

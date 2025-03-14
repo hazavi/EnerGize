@@ -34,7 +34,12 @@ export class AppComponent {
 
   // Toggle profile submenu visibility
   toggleProfileMenu() {
-    this.isProfileMenuOpen = !this.isProfileMenuOpen;
+    if (this.isCollapsed) {
+      this.isCollapsed = false;
+      this.isProfileMenuOpen = true;
+    } else {
+      this.isProfileMenuOpen = !this.isProfileMenuOpen;
+    }
   }
 
   // Update the UI based on login status

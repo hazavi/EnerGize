@@ -1,1 +1,117 @@
-<p>admin works!</p>
+<div class="admin-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h3>Admin Panel</h3>
+        <ul>
+            <li (click)="currentView = 'bodyparts'" [class.active]="currentView === 'bodyparts'">Body Parts</li>
+            <li (click)="currentView = 'categories'" [class.active]="currentView === 'categories'">Categories</li>
+            <li (click)="currentView = 'exercises'" [class.active]="currentView === 'exercises'">Exercises</li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <div *ngIf="currentView === 'bodyparts'">
+            <h2>Body Parts</h2>
+            <button (click)="openModal()">Add Body Part</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let part of bodyParts">
+                        <td>{{ part.bodyPartId }}</td>
+                        <td>{{ part.bodyPartName }}</td>
+                        <td>
+                            <button (click)="editBodyPart(part)">Edit</button>
+                            <button (click)="deleteBodyPart(part.bodyPartId)">Delete</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div *ngIf="currentView === 'categories'">
+            <h2>Categories</h2>
+            <button (click)="openModal()">Add Category</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let category of categories">
+                        <td>{{ category.categoryId }}</td>
+                        <td>{{ category.CategoryName }}</td>
+                        <td>
+                            <button (click)="editCategory(category)">Edit</button>
+                            <button (click)="deleteCategory(category.categoryId)">Delete</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div *ngIf="currentView === 'exercises'">
+            <h2>Exercises</h2>
+            <button (click)="openModal()">Add Exercise</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Instructions</th>
+                        <th>Body Part ID</th>
+                        <th>Category ID</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let exercise of exercises">
+                        <td>{{ exercise.exerciseId }}</td>
+                        <td>{{ exercise.exerciseName }}</td>
+                        <td>{{ exercise.instructions }}</td>
+                        <td>{{ exercise.bodyPartId }}</td>
+                        <td>{{ exercise.categoryId }}</td>
+                        <td>
+                            <button (click)="editExercise(exercise)">Edit</button>
+                            <button (click)="deleteExercise(exercise.exerciseId)">Delete</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Dialog -->
+    <div class="modal" *ngIf="isModalOpen">
+        <div class="modal-content">
+            <span (click)="closeModal()" class="close">&times;</span>
+            <h3>{{ currentView === 'bodyparts' ? (newBodyPart.bodyPartId ? 'Edit Body Part' : 'Add Body Part') :
+                currentView === 'categories' ? (newCategory.categoryId ? 'Edit Category' : 'Add Category') :
+                (newExercise.exerciseId ? 'Edit Exercise' : 'Add Exercise') }}</h3>
+
+            <!-- Dynamic Form Fields -->
+            <div *ngIf="currentView === 'bodyparts'">
+                <input [(ngModel)]="newBodyPart.bodyPartName" placeholder="Enter Body Part Name" />
+            </div>
+            <div *ngIf="currentView === 'categories'">
+                <input [(ngModel)]="newCategory.CategoryName" placeholder="Enter Category Name" />
+            </div>
+            <div *ngIf="currentView === 'exercises'">
+                <input [(ngModel)]="newExercise.exerciseName" placeholder="Exercise Name" />
+                <input [(ngModel)]="newExercise.instructions" placeholder="Instructions" />
+                <input [(ngModel)]="newExercise.bodyPartId" placeholder="Body Part ID" type="number" />
+                <input [(ngModel)]="newExercise.categoryId" placeholder="Category ID" type="number" />
+            </div>
+
+            <button (click)="addOrUpdateEntry()">Save</button>
+        </div>
+    </div>

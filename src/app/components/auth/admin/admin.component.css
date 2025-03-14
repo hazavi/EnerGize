@@ -1,0 +1,174 @@
+/* Admin Container */
+  .admin-container {
+    display: flex;
+    height: 100vh;
+  }
+  
+  /* Sidebar */
+  .sidebar {
+    width: 200px;
+    background-color: var(--base-clr);
+    padding: 20px;
+    border-right: 1px solid var(--line-clr);
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+  }
+  
+  .sidebar h3 {
+    margin-bottom: 20px;
+    color: var(--accent-clr);
+    font-size: 1.2rem;
+  }
+  
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .sidebar ul li {
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    color: var(--secondary-text-clr);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  .sidebar ul li:hover {
+    background-color: var(--hover-clr);
+    color: var(--text-clr);
+  }
+  
+  .sidebar ul li.active {
+    background-color: var(--accent-clr);
+    color: var(--text-clr);
+  }
+  
+  /* Main Content */
+  .content {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background-color: var(--base-clr);
+  }
+  
+  .content h2 {
+    color: var(--accent-clr);
+    margin-bottom: 20px;
+  }
+  
+  .content button {
+    background-color: var(--accent-clr);
+    color: var(--text-clr);
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .content button:hover {
+    background-color: #4c4fff;
+  }
+  
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: var(--card-clr);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  
+  table th,
+  table td {
+    border: 1px solid var(--line-clr);
+    padding: 12px;
+    text-align: left;
+    color: var(--text-clr);
+  }
+  
+  table th {
+    background-color: var(--hover-clr);
+    color: var(--text-clr);
+  }
+  
+  table tbody tr:hover {
+    background-color: var(--hover-clr);
+  }
+  
+  table button {
+    background-color: transparent;
+    border: none;
+    color: var(--accent-clr);
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+  
+  table button:hover {
+    color: #4c4fff;
+  }
+  
+  /* Modal Dialog */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .modal-content {
+    background-color: var(--card-clr);
+    padding: 20px;
+    border-radius: 10px;
+    width: 400px;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  }
+  
+  .modal-content h3 {
+    color: var(--accent-clr);
+    margin-bottom: 15px;
+  }
+  
+  .modal-content input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid var(--line-clr);
+    border-radius: 5px;
+    background-color: var(--base-clr);
+    color: var(--text-clr);
+  }
+  
+  .modal-content button {
+    background-color: var(--accent-clr);
+    color: var(--text-clr);
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .modal-content button:hover {
+    background-color: #4c4fff;
+  }
+  
+  .close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--secondary-text-clr);
+  }
+  
+  .close:hover {
+    color: var(--accent-clr);
+  }

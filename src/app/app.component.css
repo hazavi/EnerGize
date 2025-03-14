@@ -5,6 +5,7 @@
 * {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
 .app-container {
@@ -47,6 +48,11 @@
 
   ul {
     list-style: none;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    margin: 0;
+    padding: 0;
 
     > li:first-child {
       display: flex;
@@ -55,8 +61,9 @@
     }
 
     > li {
-      margin: 5px 0;
+      margin: 0;
       position: relative;
+      width: 100%;
 
       &::before {
         content: "";
@@ -77,6 +84,12 @@
           transform: scale(1.1);
         }
       }
+    }
+
+    > li:last-child {
+      margin-top: auto;
+      padding-bottom: 20px;
+      position: relative; /* Important for positioning the submenu */
     }
   }
 
@@ -108,6 +121,8 @@
     transition: all 200ms ease-in-out;
     position: relative;
     overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
 
     &:hover {
       background-color: var(--hover-clr);
@@ -160,12 +175,17 @@
 
 main {
   padding: 2em;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .container {
-  /* border: 1px solid var(--line-clr); */
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
   border-radius: 1em;
   padding: min(3em, 15%);
+  box-sizing: border-box;
 
   h2,
   p {
@@ -173,18 +193,98 @@ main {
   }
 }
 
+/* Profile submenu styling - FIXED HEIGHT */
+#profile-submenu {
+  display: none;
+  position: absolute;
+  bottom: 100%; /* Position directly above the parent element */
+  left: 0;
+  background-color: var(--base-clr);
+  border: 1px solid var(--line-clr);
+  border-radius: 0.5em;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  margin-bottom: 10px; /* Gap between submenu and parent element */
+  z-index: 1500; /* Ensure it's above everything */
+  box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+  min-width: 200px;
+  font-size: 0.9rem;
+  overflow: hidden;
+  height: auto; /* Let the height adjust to content */
+}
+
+/* Show the submenu when the parent is hovered or clicked */
+li:hover > #profile-submenu,
+li:focus-within > #profile-submenu,
+li.active > #profile-submenu {
+  display: block;
+}
+
+/* Remove fixed heights for admin and non-admin */
+#profile-submenu:not(.admin) {
+  min-height: 120px;
+}
+#profile-submenu.admin {
+  min-height: 165px;
+}
+
+#profile-submenu li {
+  margin: 0;
+  width: 100%;
+}
+
+#profile-submenu li a,
+#profile-submenu li button,
+#profile-submenu li #logout-btn {
+  text-decoration: none;
+  color: var(--text-clr);
+  background-color: transparent;
+  padding: 0.7em 1em;
+  border: none;
+  border-radius: 0.3em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  transition: background-color 200ms ease-in-out, color 200ms ease-in-out;
+  font-weight: 500;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+#profile-submenu li a:hover,
+#profile-submenu li button:hover,
+#profile-submenu li #logout-btn:hover {
+  background-color: var(--hover-clr);
+  color: var(--accent-clr);
+}
+
+#profile-submenu li a:focus,
+#profile-submenu li button:focus,
+#profile-submenu li #logout-btn:focus {
+  outline: none;
+  background-color: var(--hover-clr);
+  color: var(--accent-clr);
+}
+
+/* Responsive styles */
 @media (max-width: 800px) {
   .app-container {
     grid-template-columns: 1fr;
   }
 
   main {
-    padding: 2em 1em 60px 1em;
+    padding: 1em 1em 60px 1em;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .container {
     border: none;
     padding: 0;
+    width: 100%;
   }
 
   #sidebar {
@@ -201,37 +301,50 @@ main {
 
     > ul {
       padding: 0;
-      display: grid;
-      grid-auto-columns: 60px;
-      grid-auto-flow: column;
+      height: 60px;
+      flex-direction: row;
+      display: flex;
+      justify-content: space-evenly; /* Changed to space-evenly for no gaps */
       align-items: center;
-      overflow-x: scroll;
+      width: 100%;
+      margin: 0;
+      overflow-x: auto;
       scrollbar-width: none;
       -ms-overflow-style: none;
 
       &::-webkit-scrollbar {
         display: none;
       }
-    }
 
-    ul li {
-      height: 100%;
-      margin: 0;
+      > li {
+        height: 100%;
+        width: auto;
+        flex: 1 1 0; /* Equal width distribution, no gaps */
+        margin: 0;
+        padding: 0;
 
-      &::before {
-        width: 100%;
-        height: 3px;
-        top: 0;
-        transition: width 200ms ease-in-out;
+        &::before {
+          width: 100%;
+          height: 3px;
+          top: 0;
+          transition: width 200ms ease-in-out;
+        }
+
+        &:last-child {
+          margin-top: 0;
+          padding-bottom: 0;
+        }
       }
     }
 
     ul a {
-      width: 60px;
+      width: 100%;
       height: 60px;
       padding: 0;
+      margin: 0;
       border-radius: 0;
       justify-content: center;
+      align-items: center;
       transform: none;
 
       &:hover {
@@ -245,76 +358,30 @@ main {
       display: none;
     }
   }
-}
-#sidebar ul {
-  display: flex;
-  flex-direction: column; /* Stack items vertically */
-  height: 100%; /* Ensure the list takes up the full height of the sidebar */
+
+  /* Fixed mobile profile submenu positioning */
+  #profile-submenu {
+    bottom: 60px; /* Position exactly above the mobile nav bar */
+    right: 0; /* Align with the profile icon */
+    margin-bottom: 0; /* Remove the gap */
+    position: fixed; /* Fix position relative to viewport */
+    height: auto; /* Let the height adjust to content */
+    max-height: calc(20vh); /* Prevent it from overflowing the screen */
+    overflow-y: auto; /* Allow scrolling if there are many items */
+  }
+
+  /* For the last nav item that contains the profile link */
+  #sidebar > ul > li:last-child {
+    position: static; /* Makes the submenu position relative to the sidebar instead */
+  }
+
+  /* Show submenu when nav item is tapped */
+  #sidebar > ul > li.show-submenu #profile-submenu {
+    display: block;
+  }
 }
 
-#sidebar ul li:last-child {
-  margin-top: auto; /* Push the last item (login) to the bottom */
-  padding-bottom: 20px;
-}
-
-/* Submenu styling */
-#profile-submenu {
-  display: none; /* Hidden by default */
-  position: absolute;
-  bottom: 150%; /* Position above the profile link */
-  left: 0; /* Align with the left edge of the parent */
-  background-color: var(--base-clr); /* Match the sidebar background */
-  border: 1px solid var(--line-clr); /* Add a subtle border */
-  border-radius: 0.5em; /* Rounded corners */
-  list-style: none;
-  padding: 0.8em 0; /* Increased vertical padding for better spacing */
-  margin: 0;
-  z-index: 1000; /* Ensure it appears above other elements */
-  box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow above */
-  min-width: 200px; /* Set a fixed width for consistency */
-  min-height: 150px; /* Increased height to fit both buttons */
-  font-size: 0.9rem; /* Adjust font size for readability */
-  overflow: hidden; /* Prevent content from overflowing */
-}
-
-/* Submenu items */
-#profile-submenu li {
-  margin: 0;
-}
-
-/* Styling for submenu links and buttons */
-#profile-submenu li a,
-#profile-submenu li button,
-#profile-submenu li #logout-btn {
-  text-decoration: none;
-  color: var(--text-clr);
-  background-color: transparent;
-  padding: 0.7em 1em; /* Slightly increased padding for taller buttons */
-  border: none; /* Remove default button borders */
-  border-radius: 0.3em; /* Slightly rounded corners */
-  cursor: pointer;
-  display: flex; /* Use flexbox for alignment */
-  align-items: center; /* Center items vertically */
-  gap: 0.5em; /* Space between icon and text */
-  transition: background-color 200ms ease-in-out, color 200ms ease-in-out; /* Smooth transitions */
-  font-weight: 500; /* Slightly bold text for emphasis */
-  width: 100%; /* Full width for consistency */
-  box-sizing: border-box; /* Ensure padding doesn't affect width */
-}
-
-/* Hover effects */
-#profile-submenu li a:hover,
-#profile-submenu li button:hover,
-#profile-submenu li #logout-btn:hover {
-  background-color: var(--hover-clr); /* Highlight on hover */
-  color: var(--accent-clr); /* Change text color for contrast */
-}
-
-/* Active/focused state */
-#profile-submenu li a:focus,
-#profile-submenu li button:focus,
-#profile-submenu li #logout-btn:focus {
-  outline: none; /* Remove default focus outline */
-  background-color: var(--hover-clr); /* Highlight when focused */
-  color: var(--accent-clr); /* Change text color for contrast */
+/* Add JavaScript toggle class support */
+.show-submenu #profile-submenu {
+  display: block !important;
 }
