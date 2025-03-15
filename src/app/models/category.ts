@@ -1,8 +1,7 @@
-import { Exercise } from "./exercise";
+import { Exercise } from './exercise';
 
 export class Category {
   categoryId: number = 0;
-  CategoryName: string = '';
+  categoryName: string = '';
   exercises: Exercise[] = [];
-
 }

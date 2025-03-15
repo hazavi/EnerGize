@@ -5,10 +5,12 @@ import { Category } from '../../../models/category';
 import { GenericService } from '../../../service/generic.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { NgxPaginationModule } from 'ngx-pagination';
+import { EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-admin',
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, NgxPaginationModule],
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.css'],
 })
@@ -19,7 +21,7 @@ export class AdminComponent {
   exercises: Exercise[] = [];
 
   newBodyPart: BodyPart = { bodyPartId: 0, bodyPartName: '' };
-  newCategory: Category = { categoryId: 0, CategoryName: '', exercises: [] };
+  newCategory: Category = { categoryId: 0, categoryName: '', exercises: [] };
   newExercise: Exercise = {
     exerciseId: 0,
     exerciseName: '',
@@ -31,6 +33,16 @@ export class AdminComponent {
 
   isModalOpen: boolean = false; // Controls modal visibility
 
+  // Pagination variables
+  bodyPartsPage: number = 1;
+  categoriesPage: number = 1;
+  exercisesPage: number = 1;
+
+  fileName: string = '';
+
+  @Input() imagePreview: string | ArrayBuffer | null = null;
+  @Output() fileSelected = new EventEmitter<File>();
+
   constructor(private genericService: GenericService<any>) {}
 
   ngOnInit(): void {
@@ -40,12 +52,25 @@ export class AdminComponent {
   }
   addOrUpdateEntry(): void {
     if (this.currentView === 'bodyparts') {
-      this.addBodyPart();
+      if (this.newBodyPart.bodyPartId) {
+        this.addBodyPart();
+      } else {
+        this.addBodyPart();
+      }
     } else if (this.currentView === 'categories') {
-      this.addCategory();
+      if (this.newCategory.categoryId) {
+        this.addCategory();
+      } else {
+        this.addCategory();
+      }
     } else if (this.currentView === 'exercises') {
-      this.addExercise();
+      if (this.newExercise.exerciseId) {
+        this.addExercise();
+      } else {
+        this.addExercise();
+      }
     }
+    this.closeModal();
   }
   loadBodyParts(): void {
     this.genericService.getAll('bodyparts').subscribe((data) => {
@@ -55,17 +80,21 @@ export class AdminComponent {
 
   addBodyPart(): void {
     if (this.newBodyPart.bodyPartId === 0) {
-      this.genericService.create('bodyparts', this.newBodyPart).subscribe(() => {
-        this.loadBodyParts();
-        this.resetForm();
-        this.closeModal();
-      });
+      this.genericService
+        .create('bodyparts', this.newBodyPart)
+        .subscribe(() => {
+          this.loadBodyParts();
+          this.resetForm();
+          this.closeModal();
+        });
     } else {
-      this.genericService.updatebyid('bodyparts', this.newBodyPart.bodyPartId, this.newBodyPart).subscribe(() => {
-        this.loadBodyParts();
-        this.resetForm();
-        this.closeModal();
-      });
+      this.genericService
+        .updatebyid('bodyparts', this.newBodyPart.bodyPartId, this.newBodyPart)
+        .subscribe(() => {
+          this.loadBodyParts();
+          this.resetForm();
+          this.closeModal();
+        });
     }
   }
 
@@ -82,7 +111,7 @@ export class AdminComponent {
 
   resetForm(): void {
     this.newBodyPart = { bodyPartId: 0, bodyPartName: '' };
-    this.newCategory = { categoryId: 0, CategoryName: '', exercises: [] };
+    this.newCategory = { categoryId: 0, categoryName: '', exercises: [] };
     this.newExercise = {
       exerciseId: 0,
       exerciseName: '',
@@ -111,17 +140,21 @@ export class AdminComponent {
 
   addCategory(): void {
     if (this.newCategory.categoryId === 0) {
-      this.genericService.create('categories', this.newCategory).subscribe(() => {
-        this.loadCategories();
-        this.resetForm();
-        this.closeModal();
-      });
+      this.genericService
+        .create('categories', this.newCategory)
+        .subscribe(() => {
+          this.loadCategories();
+          this.resetForm();
+          this.closeModal();
+        });
     } else {
-      this.genericService.updatebyid('categories', this.newCategory.categoryId, this.newCategory).subscribe(() => {
-        this.loadCategories();
-        this.resetForm();
-        this.closeModal();
-      });
+      this.genericService
+        .updatebyid('categories', this.newCategory.categoryId, this.newCategory)
+        .subscribe(() => {
+          this.loadCategories();
+          this.resetForm();
+          this.closeModal();
+        });
     }
   }
 
@@ -144,17 +177,21 @@ export class AdminComponent {
 
   addExercise(): void {
     if (this.newExercise.exerciseId === 0) {
-      this.genericService.create('exercises', this.newExercise).subscribe(() => {
-        this.loadExercises();
-        this.resetForm();
-        this.closeModal();
-      });
+      this.genericService
+        .create('exercises', this.newExercise)
+        .subscribe(() => {
+          this.loadExercises();
+          this.resetForm();
+          this.closeModal();
+        });
     } else {
-      this.genericService.updatebyid('exercises', this.newExercise.exerciseId, this.newExercise).subscribe(() => {
-        this.loadExercises();
-        this.resetForm();
-        this.closeModal();
-      });
+      this.genericService
+        .updatebyid('exercises', this.newExercise.exerciseId, this.newExercise)
+        .subscribe(() => {
+          this.loadExercises();
+          this.resetForm();
+          this.closeModal();
+        });
     }
   }
 
@@ -167,5 +204,26 @@ export class AdminComponent {
   editExercise(exercise: Exercise): void {
     this.newExercise = { ...exercise };
     this.openModal();
+  }
+
+  getBodyPartName(id: number): string {
+    const part = this.bodyParts.find((p) => p.bodyPartId === id);
+    return part ? part.bodyPartName : 'Unknown';
+  }
+
+  getCategoryName(id: number): string {
+    const category = this.categories.find((c) => c.categoryId === id);
+    return category ? category.categoryName : 'Unknown';
+  }
+
+  onFileChange(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.newExercise.thumbnail = new Uint8Array(e.target.result);
+      };
+      reader.readAsArrayBuffer(file);
+    }
   }
 }

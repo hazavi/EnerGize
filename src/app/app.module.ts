@@ -9,6 +9,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { LoadingComponent } from './components/loading/loading.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { NgxPaginationModule } from 'ngx-pagination';
 
 @NgModule({
   declarations: [],
@@ -18,7 +19,8 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     MatDialogModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
-    LoadingComponent
+    LoadingComponent,
+    NgxPaginationModule,
   ],
   providers: [],
   // exports: [RouterModule],

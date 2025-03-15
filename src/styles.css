@@ -7,12 +7,24 @@
   --accent-clr: #5e63ff;
   --secondary-text-clr: #b0b3c1;
   --card-clr: #1e1e25bc;
+
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --secondary: #f3f4f6;
+  --text-primary: #e6e6ef;
+  --text-secondary: #e6e6ef;
+  --danger: #ef4444;
+  --danger-hover: #dc2626;
+  --success: #10b981;
+  --border: #e5e7eb;
+  --admin-card-clr: #0d041b;
 }
 body {
   font-family: Poppins, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.5rem;
   background-color: var(--base-clr);
   color: var(--text-clr);
+  
 }
 
 html,
