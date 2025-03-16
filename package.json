@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "cross-env API_URL=https://energizeapi.azurewebsites.net/api PRODUCTION=true node generate-env.js && ng build --configuration production",
+    "build": "cross-env API_URL=https://energizeapi2025.azurewebsites.net/api PRODUCTION=true node generate-env.js && ng build --configuration production",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
