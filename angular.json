@@ -92,6 +92,19 @@
             ],
             "scripts": []
           }
+        },
+        "custom-build": {
+          "builder": "@angular-devkit/architect:run",
+          "options": {
+            "commands": [
+              {
+                "command": "node generate-env.js"
+              },
+              {
+                "command": "ng build --configuration production"
+              }
+            ]
+          }
         }
       }
     }
