@@ -1,8 +1,13 @@
+require("dotenv").config();
 const fs = require("fs");
 const path = require("path");
 
-// Read environment variables from process.env
-const apiUrl = process.env.API_URL || "https://default-api-url.com/api";
+// Read environment variables (ensure API_URL is set in Vercel)
+const apiUrl = process.env.API_URL;
+if (!apiUrl) {
+  throw new Error("API_URL environment variable is not set!");
+}
+
 const production = process.env.PRODUCTION === "true";
 
 // Define the content for environment files
