@@ -162,14 +162,14 @@
                 <div *ngIf="currentView === 'bodyparts'">
                     <div class="form-group">
                         <label for="bodyPartName">Body Part Name</label>
-                        <input id="bodyPartName" class="form-control" [(ngModel)]="newBodyPart.bodyPartName"
+                        <input id="bodyPartName" class="form-control" [(ngModel)]="newBodyPart.bodyPartName" required
                             placeholder="Enter Body Part Name" />
                     </div>
                 </div>
                 <div *ngIf="currentView === 'categories'">
                     <div class="form-group">
                         <label for="categoryName">Category Name</label>
-                        <input id="categoryName" class="form-control" [(ngModel)]="newCategory.categoryName"
+                        <input id="categoryName" class="form-control" [(ngModel)]="newCategory.categoryName" required
                             placeholder="Enter Category Name" />
                     </div>
                 </div>
@@ -178,28 +178,33 @@
                         <label for="thumbnail">Thumbnail</label>
                         <input type="file" id="thumbnail" class="form-control" (change)="onFileChange($event)" />
                     </div>
+                    <div *ngIf="imagePreview" class="image-preview">
+                        <img [src]="imagePreview" alt="Thumbnail Preview"
+                            style="max-width: 100px; max-height: 100px;" />
+                    </div>
                     <div class="form-group">
                         <label for="exerciseName">Exercise Name</label>
-                        <input id="exerciseName" class="form-control" [(ngModel)]="newExercise.exerciseName"
+                        <input id="exerciseName" class="form-control" [(ngModel)]="newExercise.exerciseName" required
                             placeholder="Exercise Name" />
                     </div>
                     <div class="form-group">
                         <label for="instructions">Instructions</label>
-                        <textarea id="instructions" class="form-control" [(ngModel)]="newExercise.instructions"
+                        <textarea id="instructions" class="form-control" [(ngModel)]="newExercise.instructions" required
                             placeholder="Instructions" rows="3"></textarea>
                     </div>
                     <div class="form-group">
                         <label for="bodyPartId">Body Part</label>
-                        <select id="bodyPartId" class="form-control" [(ngModel)]="newExercise.bodyPartId">
+                        <select id="bodyPartId" class="form-control" [(ngModel)]="newExercise.bodyPartId" required>
                             <option *ngFor="let part of bodyParts" [value]="part.bodyPartId">{{ part.bodyPartName }}
                             </option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="categoryId">Category</label>
-                        <select id="categoryId" class="form-control" [(ngModel)]="newExercise.categoryId">
+                        <select id="categoryId" class="form-control" [(ngModel)]="newExercise.categoryId" required>
                             <option *ngFor="let category of categories" [value]="category.categoryId">{{
-                                category.categoryName }}</option>
+                                category.categoryName }}
+                            </option>
                         </select>
                     </div>
                 </div>

@@ -2,20 +2,28 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { AuthService } from './auth.service';
 
-const httpOptions = {
-  headers: new HttpHeaders({
-    'Content-type': 'application/json',
-  }),
-};
+// const httpOptions = {
+//   headers: new HttpHeaders({
+//     'Content-type': 'application/json',
+//   }),
+// };
 @Injectable({
   providedIn: 'root',
 })
 export class GenericService<Model> {
-  private readonly url: string = environment.apiUrl;;
+  private readonly url: string = environment.apiUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
+  private getHeaders(): HttpHeaders {
+    const token = this.authService.getToken();
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      Authorization: token ? `Bearer ${token}` : '',
+    });
+  }
   // Get All Model
   getAll(endPoint: string): Observable<Model[]> {
     return this.http.get<Model[]>(this.url + '/' + endPoint); // GET
@@ -52,4 +60,8 @@ export class GenericService<Model> {
     return this.http.post(`${this.url}/users/login`, data);
   }
 
+  // Create Model with File Upload (FormData)
+  createWithFile(endPoint: string, formData: FormData): Observable<any> {
+    return this.http.post(`${this.url}/${endPoint}`, formData);
+  }
 }
