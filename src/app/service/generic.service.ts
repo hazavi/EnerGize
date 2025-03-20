@@ -1,14 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
-const httpOptions = {
-  headers: new HttpHeaders({
-    'Content-type': 'application/json',
-  }),
-};
 @Injectable({
   providedIn: 'root',
 })
@@ -17,6 +12,7 @@ export class GenericService<Model> {
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
+  // ✅ Create function to get auth headers
   private getHeaders(): HttpHeaders {
     const token = this.authService.getToken();
     return new HttpHeaders({
@@ -24,32 +20,42 @@ export class GenericService<Model> {
       Authorization: token ? `Bearer ${token}` : '',
     });
   }
-  // Get All Model
+
+  // ✅ Include headers in all API calls
   getAll(endPoint: string): Observable<Model[]> {
-    return this.http.get<Model[]>(this.url + '/' + endPoint); // GET
+    return this.http.get<Model[]>(`${this.url}/${endPoint}`, {
+      headers: this.getHeaders(),
+    });
   }
 
-  // Get Model by ID
   getbyid(endPoint: string, id: string): Observable<Model> {
-    return this.http.get<Model>(`${this.url}/${endPoint}/${id}`); // GET{Id}
+    return this.http.get<Model>(`${this.url}/${endPoint}/${id}`, {
+      headers: this.getHeaders(),
+    });
   }
 
-  // Create Model
   create(endPoint: string, model: Model): Observable<Model> {
-    return this.http.post<Model>(`${this.url}/${endPoint}`, model); // POST
+    return this.http.post<Model>(`${this.url}/${endPoint}`, model, {
+      headers: this.getHeaders(),
+    });
   }
 
   create2<T>(endPoint: string, model: T): Observable<T> {
-    return this.http.post<T>(`${this.url}/${endPoint}`, model); // POST
-  }
-  // Update Model by ID
-  updatebyid(endPoint: string, id: number, model: Model): Observable<Model> {
-    return this.http.put<Model>(`${this.url}/${endPoint}/${id}`, model); // PUT
+    return this.http.post<T>(`${this.url}/${endPoint}`, model, {
+      headers: this.getHeaders(),
+    });
   }
 
-  // Delete Model by Id
+  updatebyid(endPoint: string, id: number, model: Model): Observable<Model> {
+    return this.http.put<Model>(`${this.url}/${endPoint}/${id}`, model, {
+      headers: this.getHeaders(),
+    });
+  }
+
   deletebyid(endPoint: string, id: number): Observable<void> {
-    return this.http.delete<void>(`${this.url}/${endPoint}/${id}`); // DELETE
+    return this.http.delete<void>(`${this.url}/${endPoint}/${id}`, {
+      headers: this.getHeaders(),
+    });
   }
 
   register(data: any): Observable<any> {
@@ -60,8 +66,9 @@ export class GenericService<Model> {
     return this.http.post(`${this.url}/users/login`, data);
   }
 
-  // Create Model with File Upload (FormData)
   createWithFile(endPoint: string, formData: FormData): Observable<any> {
-    return this.http.post(`${this.url}/${endPoint}`, formData);
+    return this.http.post(`${this.url}/${endPoint}`, formData, {
+      headers: this.getHeaders(),
+    });
   }
 }

@@ -24,7 +24,7 @@ import { LoadingComponent } from '../../loading/loading.component';
     ReactiveFormsModule,
     RouterModule,
     MatProgressSpinnerModule,
-    LoadingComponent
+    LoadingComponent,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
@@ -77,6 +77,11 @@ export class LoginComponent {
     this.genericService.login(loginData).subscribe(
       (response: any) => {
         console.log('User logged in:', response);
+
+        if (response.token) {
+          // ✅ Store the token for authentication
+          localStorage.setItem('authToken', response.token);
+        }
 
         // Map the API response to the LoginResponse interface
         this.loginResponse = {
