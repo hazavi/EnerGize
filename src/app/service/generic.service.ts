@@ -4,11 +4,11 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
-// const httpOptions = {
-//   headers: new HttpHeaders({
-//     'Content-type': 'application/json',
-//   }),
-// };
+const httpOptions = {
+  headers: new HttpHeaders({
+    'Content-type': 'application/json',
+  }),
+};
 @Injectable({
   providedIn: 'root',
 })
