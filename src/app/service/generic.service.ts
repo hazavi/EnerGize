@@ -4,6 +4,12 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
+const httpOptions = {
+  headers: new HttpHeaders({
+    'Content-Type': 'application/json',
+  }),
+};
+
 @Injectable({
   providedIn: 'root',
 })
@@ -67,8 +73,10 @@ export class GenericService<Model> {
   }
 
   createWithFile(endPoint: string, formData: FormData): Observable<any> {
-    return this.http.post(`${this.url}/${endPoint}`, formData, {
-      headers: this.getHeaders(),
+    // Use the 'multipart/form-data' content type for file uploads
+    const headers = new HttpHeaders({
+      Authorization: this.getHeaders().get('Authorization') ?? '',
     });
+    return this.http.post(`${this.url}/${endPoint}`, formData, { headers });
   }
 }

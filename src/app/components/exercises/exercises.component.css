@@ -1,0 +1,156 @@
+/* Main container styles */
+.exercise-container {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Section title */
+.section-title {
+  font-size: 1.75rem;
+  font-weight: 500;
+  color: #fff;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Grid layout for exercise cards */
+.exercise-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+}
+
+/* Exercise card styling */
+.exercise-card {
+  display: flex;
+  flex-direction: column;
+  background-color: #222;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid #f0f0f0;
+}
+
+.exercise-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+}
+
+/* Thumbnail wrapper */
+.thumbnail-wrapper {
+  position: relative;
+  padding-top: 56.25%; /* 16:9 aspect ratio */
+  background-color: #ffffff;
+}
+
+.exercise-thumbnail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background-color: #f8f8f8;
+}
+
+/* Exercise content section */
+.exercise-content {
+  padding: 1rem;
+  flex-grow: 1;
+}
+
+.exercise-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #fff;
+  margin: 0 0 0.75rem 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Meta information styles - side by side */
+.exercise-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.meta-icon {
+  color: #fff;
+  margin-right: 0.4rem;
+  font-size: 0.85rem;
+}
+
+.meta-value {
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 400;
+}
+
+/* Loading indicator */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+/* No exercises state */
+.no-exercises {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 0;
+}
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.pagination-button {
+  padding: 10px 20px;
+  margin: 0 10px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.pagination-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  font-size: 16px;
+  color: #fff;
+}
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .exercise-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .exercise-container {
+    padding: 1rem;
+  }
+}

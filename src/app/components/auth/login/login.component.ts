@@ -76,8 +76,7 @@ export class LoginComponent {
 
     this.genericService.login(loginData).subscribe(
       (response: any) => {
-        console.log('User logged in:', response);
-
+        
         if (response.token) {
           // ✅ Store the token for authentication
           localStorage.setItem('authToken', response.token);

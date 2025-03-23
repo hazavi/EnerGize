@@ -1,1 +1,64 @@
-<p>exercises works!</p>
+<app-loading *ngIf="isLoading" class="loading-spinner"></app-loading>
+
+<div class="exercise-container" *ngIf="!isLoading">
+    <div *ngIf="exercises.length > 0; else noExercises">
+      <h2 class="section-title">Exercises</h2>
+      
+      <div class="exercise-grid">
+        <!-- Display paginated exercises -->
+        <div class="exercise-card" *ngFor="let exercise of paginatedExercises">
+          <div class="thumbnail-wrapper" *ngIf="exercise.thumbnailBase64">
+            <img 
+              [src]="'data:image/gif;base64,' + exercise.thumbnailBase64" 
+              alt="Exercise thumbnail"
+              class="exercise-thumbnail" 
+              (error)="handleImageError($event)" 
+            />
+          </div>
+          
+          <div class="exercise-content">
+            <h3 class="exercise-title">{{ exercise.exerciseName }}</h3>
+            
+            <div class="exercise-meta">
+              <div class="meta-item">
+                <i class="meta-icon fas fa-dumbbell"></i>
+                <span class="meta-value">{{ getCategoryName(exercise.categoryId) }}</span>
+              </div>
+              
+              <div class="meta-item">
+                <i class="meta-icon fas fa-child"></i>
+                <span class="meta-value">{{ getBodyPartName(exercise.bodyPartId) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Pagination Controls -->
+      <div class="pagination-container" *ngIf="totalPages > 1">
+        <button 
+          class="pagination-button" 
+          [disabled]="currentPage === 1" 
+          (click)="changePage(currentPage - 1)">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+  
+        <span class="pagination-info">
+          Page {{ currentPage }} of {{ totalPages }}
+        </span>
+  
+        <button 
+          class="pagination-button" 
+          [disabled]="currentPage === totalPages" 
+          (click)="changePage(currentPage + 1)">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+
+  <ng-template #noExercises>
+    <div class="no-exercises">
+      <app-loading></app-loading>
+    </div>
+  </ng-template>
+</div>

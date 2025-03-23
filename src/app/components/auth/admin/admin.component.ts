@@ -30,15 +30,7 @@ export class AdminComponent {
 
   newBodyPart: BodyPart = { bodyPartId: 0, bodyPartName: '' };
   newCategory: Category = { categoryId: 0, categoryName: '', exercises: [] };
-  newExercise: Exercise = {
-    exerciseId: 0,
-    exerciseName: '',
-    instructions: '',
-    bodyPartId: 0,
-    categoryId: 0,
-    workoutExercises: [],
-    thumbnail: new Uint8Array(), // Thumbnail as Uint8Array
-  };
+  newExercise: Exercise = new Exercise();
 
   isModalOpen: boolean = false; // Controls modal visibility
 
@@ -47,7 +39,7 @@ export class AdminComponent {
   categoriesPage: number = 1;
   exercisesPage: number = 1;
 
-  fileName: string = '';
+  fileName: string | null = null;
   imagePreview: string | ArrayBuffer | null = null; // For thumbnail preview
 
   @Output() fileSelected = new EventEmitter<File>();
@@ -195,14 +187,23 @@ export class AdminComponent {
     formData.append('instructions', this.newExercise.instructions);
     formData.append('bodyPartId', this.newExercise.bodyPartId.toString());
     formData.append('categoryId', this.newExercise.categoryId.toString());
-    if (this.newExercise.thumbnail) {
-      formData.append(
-        'thumbnail',
-        new Blob([this.newExercise.thumbnail], { type: 'image/*' }),
-        this.fileName
-      );
+  
+    // Validate if the file is selected and is a valid image type
+    if (this.fileName && this.newExercise.thumbnail.length > 0) {
+      const fileType = this.getFileType(this.fileName); // Get the file type based on file extension
+      if (fileType) {
+        formData.append(
+          'thumbnail',
+          new Blob([this.newExercise.thumbnail], { type: fileType }),
+          this.fileName
+        );
+      } else {
+        alert('Invalid file type. Only JPG, PNG, and GIF files are allowed.');
+        return;
+      }
     }
-
+  
+    // Send the request to create or update
     if (this.newExercise.exerciseId === 0) {
       this.genericService.createWithFile('exercises', formData).subscribe(
         () => {
@@ -226,32 +227,30 @@ export class AdminComponent {
         }
       );
     } else {
-      this.genericService
-        .updatebyid('exercises', this.newExercise.exerciseId, formData)
-        .subscribe(
-          () => {
-            this.loadExercises();
-            this.resetForm();
-            this.snackBar.open('Exercise updated successfully!', 'Close', {
-              duration: 1500,
-              verticalPosition: 'top',
-              horizontalPosition: 'center',
-              panelClass: ['success-snackbar'],
-            });
-          },
-          (error) => {
-            console.error('Error updating Exercise:', error);
-            this.snackBar.open('Failed to update Exercise.', 'Close', {
-              duration: 1500,
-              verticalPosition: 'top',
-              horizontalPosition: 'center',
-              panelClass: ['danger-snackbar'],
-            });
-          }
-        );
+      this.genericService.createWithFile('exercises', formData).subscribe(
+        () => {
+          this.loadExercises();
+          this.resetForm();
+          this.snackBar.open('Exercise updated successfully!', 'Close', {
+            duration: 1500,
+            verticalPosition: 'top',
+            horizontalPosition: 'center',
+            panelClass: ['success-snackbar'],
+          });
+        },
+        (error) => {
+          console.error('Error updating Exercise:', error);
+          this.snackBar.open('Failed to update Exercise.', 'Close', {
+            duration: 1500,
+            verticalPosition: 'top',
+            horizontalPosition: 'center',
+            panelClass: ['danger-snackbar'],
+          });
+        }
+      );
     }
   }
-
+  
   // Delete methods
   deleteBodyPart(id: number): void {
     this.genericService.deletebyid('bodyparts', id).subscribe(
@@ -351,7 +350,7 @@ export class AdminComponent {
       workoutExercises: [],
       thumbnail: new Uint8Array(),
     };
-    this.imagePreview = null; // Clear thumbnail preview
+    this.imagePreview = null;
   }
 
   // Modal controls
@@ -375,29 +374,39 @@ export class AdminComponent {
     return category ? category.categoryName : 'Unknown';
   }
 
-  // Handle file input for thumbnail
-  onFileChange(event: any): void {
+  getFileType(fileName: string): string | null {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    switch (extension) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'gif':
+        return 'image/gif';
+      default:
+        return null; // Invalid file type
+    }
+  }
+
+   // File change handler
+   onFileChange(event: any): void {
     const file = event.target.files[0];
     if (file) {
-      // Validate file type
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-      if (!allowedTypes.includes(file.type)) {
+      const fileType = this.getFileType(file.name);
+      
+      if (!fileType) {
         alert('Only JPG, PNG, and GIF files are allowed.');
         return;
       }
 
-      // Generate a Base64 preview for the image/GIF
       const reader = new FileReader();
       reader.onload = (e: any) => {
-        this.imagePreview = e.target.result; // Set the Base64 preview
-
-        // Convert the file to a Uint8Array
-        const arrayBuffer = e.target.result as ArrayBuffer;
-        this.newExercise.thumbnail = new Uint8Array(arrayBuffer);
+        this.imagePreview = e.target.result;
+        this.newExercise.thumbnail = new Uint8Array(e.target.result);
       };
       reader.readAsArrayBuffer(file);
 
-      // Store the file name
       this.fileName = file.name;
     }
   }

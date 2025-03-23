@@ -115,7 +115,6 @@
                         <tr>
                             <th>ID</th>
                             <th>Name</th>
-                            <th>Instructions</th>
                             <th>Body Part</th>
                             <th>Category</th>
                             <th>Actions</th>
@@ -126,7 +125,6 @@
                             *ngFor="let exercise of exercises | paginate: { itemsPerPage: 9, currentPage: exercisesPage }">
                             <td>{{ exercise.exerciseId }}</td>
                             <td>{{ exercise.exerciseName }}</td>
-                            <td>{{ exercise.instructions }}</td>
                             <td>{{ getBodyPartName(exercise.bodyPartId) }}</td>
                             <td>{{ getCategoryName(exercise.categoryId) }}</td>
                             <td>

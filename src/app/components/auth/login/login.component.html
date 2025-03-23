@@ -1,9 +1,11 @@
+<app-loading *ngIf="isLoading"></app-loading>
+
 <!-- Login Page -->
 <div class="auth-container">
   <div class="auth-box">
     <h2 class="auth-title">Welcome Back</h2>
     <p class="subtitle">Please enter your details to sign in</p>
-    <app-loading *ngIf="isLoading"></app-loading>
+    
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
       <!-- Email Field -->
       <div class="form-group">
