@@ -110,4 +110,15 @@ export class ExercisesComponent {
       this.currentPage = page;
     }
   }
+
+  changePageAndScroll(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.scrollToTop();
+    }
+  }
+
+  scrollToTop(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 }

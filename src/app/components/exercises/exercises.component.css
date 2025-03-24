@@ -2,6 +2,7 @@
 .exercise-container {
   padding: 1.5rem;
   max-width: 1200px;
+  min-height: 80vh;
   margin: 0 auto;
 }
 
@@ -112,32 +113,48 @@
   justify-content: center;
   padding: 3rem 0;
 }
+/* Pagination Container */
 .pagination-container {
   display: flex;
   justify-content: center;
   align-items: center;
   margin-top: 20px;
+  gap: 10px; /* Space between elements */
 }
 
+/* Pagination Buttons */
 .pagination-button {
-  padding: 10px 20px;
-  margin: 0 10px;
-  border: none;
-  background-color: #007bff;
+  background-color: #007bff; /* Blue color */
   color: white;
-  cursor: pointer;
+  border: none;
+  padding: 10px 15px;
   border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.pagination-button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
 }
 
 .pagination-button:disabled {
-  background-color: #ccc;
+  background-color: #ccc; /* Gray for disabled state */
   cursor: not-allowed;
 }
 
+/* Pagination Info */
 .pagination-info {
   font-size: 16px;
-  color: #fff;
+  color: var(--text-clr);
+  font-weight: bold;
 }
+
+/* Smooth Scroll Behavior */
+html {
+  scroll-behavior: smooth;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .exercise-grid {

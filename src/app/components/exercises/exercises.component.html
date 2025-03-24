@@ -39,22 +39,23 @@
         <button 
           class="pagination-button" 
           [disabled]="currentPage === 1" 
-          (click)="changePage(currentPage - 1)">
+          (click)="changePageAndScroll(currentPage - 1)">
           <i class="fa-solid fa-chevron-left"></i>
         </button>
-  
+
         <span class="pagination-info">
           Page {{ currentPage }} of {{ totalPages }}
         </span>
-  
+
         <button 
           class="pagination-button" 
           [disabled]="currentPage === totalPages" 
-          (click)="changePage(currentPage + 1)">
+          (click)="changePageAndScroll(currentPage + 1)">
           <i class="fa-solid fa-chevron-right"></i>
         </button>
       </div>
     </div>
+
 
   <ng-template #noExercises>
     <div class="no-exercises">
