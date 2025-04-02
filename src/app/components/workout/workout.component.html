@@ -1,0 +1,45 @@
+<div class="workout-container">
+    <app-loading *ngIf="isLoading"></app-loading>
+
+    <h2>Workout Planning</h2>
+
+    <div *ngIf="!isLoading">
+        <button class="add-btn" (click)="addTemplate()">+ Add Template</button>
+
+        <div *ngFor="let template of workoutTemplates" class="template-card">
+            <div class="template-header">
+                <span (click)="toggleCollapse(template)" class="template-title">
+                    {{ template.collapsed ? '▶' : '▼' }} {{ template.templateName }}
+                </span>
+
+                <div class="menu">
+                    <button class="menu-btn" (click)="toggleTemplateMenu(template); $event.stopPropagation()">⋮</button>
+                    <div class="menu-dropdown" *ngIf="template.menuOpen">
+                        <button (click)="renameTemplate(template)">Rename</button>
+                        <button (click)="deleteTemplate(template.templateId)">Delete</button>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="!template.collapsed" class="workout-list">
+                <div *ngFor="let workout of template.workouts" class="workout-card">
+                    <span>{{ workout.workoutName }}</span>
+
+                    <div class="menu">
+                        <button class="menu-btn"
+                            (click)="toggleWorkoutMenu(workout); $event.stopPropagation()">⋮</button>
+                        <div class="menu-dropdown" *ngIf="workout.menuOpen">
+                            <button (click)="renameWorkout(workout)">Rename</button>
+                            <button (click)="deleteWorkout(template, workout.workoutId)">Delete</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="add-workout-btn" (click)="addWorkout(template)">+ Add Workout</button>
+            </div>
+        </div>
+    </div>
+
+    <app-workout-modal *ngIf="isWorkoutModalOpen" [isOpen]="isWorkoutModalOpen" (close)="closeWorkoutModal()"
+        (save)="saveWorkout($event)"></app-workout-modal>
+</div>

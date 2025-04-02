@@ -1,0 +1,60 @@
+<div class="modal-overlay" *ngIf="isOpen">
+    <div class="modal-content">
+        <h2>Create Workout</h2>
+
+        <label>Workout Name:</label>
+        <input type="text" [(ngModel)]="workoutName" />
+
+        <label>Description:</label>
+        <textarea [(ngModel)]="description"></textarea>
+
+        <!-- Add Exercise Button -->
+        <button class="add-exercise-btn" (click)="openExerciseModal()">+ Add Exercise</button>
+
+        <!-- Selected Exercises Section -->
+        <div *ngIf="workoutExercises.length > 0">
+            <h3>Selected Exercises</h3>
+            <div *ngFor="let exercise of workoutExercises; let i = index" class="selected-exercise">
+                <span>{{ exercise.exercise?.exerciseName }}</span>
+                <button class="remove-btn" (click)="toggleExerciseSelection(exercise.exercise!)">✖</button>
+
+                <div *ngFor="let set of exercise.sets; let j = index" class="set-item">
+                    <span>Set {{ j + 1 }}:</span>
+                    <input type="number" [(ngModel)]="set.reps" placeholder="Reps" />
+                    <input type="number" [(ngModel)]="set.kg" placeholder="Kg" />
+                    <button class="remove-set-btn" (click)="removeSet(i, j)">-</button>
+                </div>
+                <button class="add-set-btn" (click)="addSet(i)">+ Add Set</button>
+            </div>
+        </div>
+
+        <!-- Modal Actions -->
+        <div class="modal-actions">
+            <button (click)="onSave()">Save</button>
+            <button (click)="onClose()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Exercise Selection Modal -->
+<div class="modal-overlay" *ngIf="isExerciseModalOpen">
+    <div class="modal-content">
+        <h2>Select Exercises</h2>
+
+        <div *ngIf="isLoading">
+            <p>Loading exercises...</p>
+        </div>
+
+        <div *ngIf="!isLoading">
+            <div class="exercise-list">
+                <div *ngFor="let exercise of exercises" class="exercise-item"
+                    [class.selected]="selectedExercises.includes(exercise)" (click)="toggleExerciseSelection(exercise)">
+                    {{ exercise.exerciseName }}
+                </div>
+            </div>
+
+            <button class="confirm-btn" (click)="confirmExerciseSelection()">Add</button>
+            <button class="cancel-btn" (click)="closeExerciseModal()">Cancel</button>
+        </div>
+    </div>
+</div>

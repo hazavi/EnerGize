@@ -79,7 +79,7 @@
         color: var(--accent-clr);
         background-color: var(--hover-clr);
 
-        svg {
+        svg, i {
           fill: var(--accent-clr);
           transform: scale(1.1);
         }
@@ -101,11 +101,11 @@
     padding: 0.85em;
     flex-grow: 1;
 
-    svg {
+    svg, i {
       transition: transform 200ms ease-in-out;
     }
 
-    &:hover svg {
+    &:hover svg, i {
       transform: rotate(-10deg);
     }
   }
@@ -129,12 +129,12 @@
       transform: translateX(5px);
       cursor: pointer;
 
-      svg {
+      svg, i {
         transform: scale(1.1);
       }
     }
 
-    svg {
+    svg, i {
       flex-shrink: 0;
       transition: transform 200ms ease-in-out, fill 200ms ease-in-out;
     }
@@ -163,12 +163,12 @@
   &:hover {
     background-color: var(--hover-clr);
 
-    svg {
+    svg, i {
       transform: scale(1.1);
     }
   }
 
-  &:active svg {
+  &:active svg, i {
     transform: scale(0.95);
   }
 }
