@@ -1,45 +1,86 @@
 <div class="workout-container">
+    <!-- Loading Indicator -->
     <app-loading *ngIf="isLoading"></app-loading>
 
-    <h2>Workout Planning</h2>
+    <!-- Main Content -->
+    <div class="workout-content" *ngIf="!isLoading">
+        <header class="workout-header">
+            <h2 class="section-title">Workout Planning</h2>
+            <button class="btn btn-primary add-template-btn" (click)="addTemplate()">
+                <i class="fas fa-plus-circle"></i> Add Template
+            </button>
+        </header>
 
-    <div *ngIf="!isLoading">
-        <button class="add-btn" (click)="addTemplate()">+ Add Template</button>
-
-        <div *ngFor="let template of workoutTemplates" class="template-card">
-            <div class="template-header">
-                <span (click)="toggleCollapse(template)" class="template-title">
-                    {{ template.collapsed ? '▶' : '▼' }} {{ template.templateName }}
-                </span>
-
-                <div class="menu">
-                    <button class="menu-btn" (click)="toggleTemplateMenu(template); $event.stopPropagation()">⋮</button>
-                    <div class="menu-dropdown" *ngIf="template.menuOpen">
-                        <button (click)="renameTemplate(template)">Rename</button>
-                        <button (click)="deleteTemplate(template.templateId)">Delete</button>
+        <!-- Templates List -->
+        <div class="templates-list">
+            <div *ngFor="let template of workoutTemplates" class="template-card">
+                <!-- Template Header -->
+                <div class="template-header">
+                    <div class="template-title-container" (click)="toggleCollapse(template)">
+                        <i class="fas" [ngClass]="template.collapsed ? 'fa-chevron-right' : 'fa-chevron-down'"></i>
+                        <h3 class="template-title">{{ template.templateName }}</h3>
                     </div>
-                </div>
-            </div>
 
-            <div *ngIf="!template.collapsed" class="workout-list">
-                <div *ngFor="let workout of template.workouts" class="workout-card">
-                    <span>{{ workout.workoutName }}</span>
-
-                    <div class="menu">
-                        <button class="menu-btn"
-                            (click)="toggleWorkoutMenu(workout); $event.stopPropagation()">⋮</button>
-                        <div class="menu-dropdown" *ngIf="workout.menuOpen">
-                            <button (click)="renameWorkout(workout)">Rename</button>
-                            <button (click)="deleteWorkout(template, workout.workoutId)">Delete</button>
+                    <!-- Template Menu -->
+                    <div class="menu-container">
+                        <button class="btn btn-icon menu-toggle"
+                            (click)="toggleTemplateMenu(template); $event.stopPropagation()">
+                            <i class="fas fa-ellipsis-vertical"></i>
+                        </button>
+                        <div class="menu-dropdown" *ngIf="template.menuOpen">
+                            <button class="menu-item" (click)="renameTemplate(template)">
+                                <i class="fas fa-edit"></i> Rename
+                            </button>
+                            <button class="menu-item delete-item" (click)="deleteTemplate(template.templateId)">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                <button class="add-workout-btn" (click)="addWorkout(template)">+ Add Workout</button>
+                <!-- Workouts List -->
+                <div *ngIf="!template.collapsed" class="workout-list">
+                    <div *ngFor="let workout of template.workouts" class="workout-card">
+                        <div class="workout-info">
+                            <i class="fas fa-dumbbell workout-icon"></i>
+                            <span class="workout-name">{{ workout.workoutName }}</span>
+                        </div>
+
+                        <!-- Workout Menu -->
+                        <div class="menu-container">
+                            <button class="btn btn-icon menu-toggle"
+                                (click)="toggleWorkoutMenu(workout); $event.stopPropagation()">
+                                <i class="fas fa-ellipsis-vertical"></i>
+                            </button>
+                            <div class="menu-dropdown" *ngIf="workout.menuOpen">
+                                <button class="menu-item" (click)="renameWorkout(workout)">
+                                    <i class="fas fa-edit"></i> Rename
+                                </button>
+                                <button class="menu-item delete-item"
+                                    (click)="deleteWorkout(template, workout.workoutId)">
+                                    <i class="fas fa-trash-alt"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add Workout Button -->
+                    <button class="btn btn-secondary add-workout-btn" (click)="addWorkout(template)">
+                        <i class="fas fa-plus"></i> Add Workout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Empty State Message -->
+            <div *ngIf="workoutTemplates.length === 0" class="empty-state">
+                <i class="fas fa-clipboard-list empty-icon"></i>
+                <p>No workout templates yet. Create your first template to get started.</p>
             </div>
         </div>
     </div>
 
+    <!-- Workout Modal -->
     <app-workout-modal *ngIf="isWorkoutModalOpen" [isOpen]="isWorkoutModalOpen" (close)="closeWorkoutModal()"
-        (save)="saveWorkout($event)"></app-workout-modal>
+        (save)="saveWorkout($event)">
+    </app-workout-modal>
 </div>

@@ -1,9 +1,14 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Workout } from '../models/workout';
 
+const httpOptions = {
+  headers: new HttpHeaders({
+    'Content-Type': 'application/json',
+  }),
+};
 @Injectable({
   providedIn: 'root',
 })
@@ -20,8 +25,16 @@ export class WorkoutService {
     return this.http.get<Workout>(`${this.apiUrl}/${id}`);
   }
 
-  create(workout: Partial<Workout>): Observable<Workout> {
-    return this.http.post<Workout>(this.apiUrl, workout);
+  create(payload: {
+    workoutName: string;
+    description: string | null;
+    workoutExercises: {
+      exerciseId: number;
+      sets: { reps: number; kg: number }[];
+    }[];
+  }): Observable<Workout> {
+    console.log('Payload being sent to backend:', payload); // Debugging log
+    return this.http.post<Workout>(this.apiUrl, payload);
   }
 
   update(id: number, workout: Partial<Workout>): Observable<void> {

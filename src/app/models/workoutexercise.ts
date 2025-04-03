@@ -1,11 +1,11 @@
 import { Exercise } from './exercise';
-import { Workout } from './workout';
+import { Set } from './set';
 
-export class WorkoutExercise {
-  workoutExerciseId: number = 0;
-  workoutId: number = 0;
-  exerciseId: number = 0;
-  sets: { reps: number; kg: number }[] = [];
-  workout?: Workout;
+export interface WorkoutExercise {
+  workoutExerciseId: number;
+  workoutId: number;
+  exerciseId: number;
+  sets: Set[]; 
   exercise?: Exercise;
+  
 }

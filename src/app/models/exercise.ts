@@ -1,3 +1,4 @@
+import { SafeUrl } from '@angular/platform-browser';
 import { BodyPart } from './bodypart';
 import { Category } from './category';
 import { WorkoutExercise } from './workoutexercise';
@@ -14,4 +15,5 @@ export class Exercise {
   workoutExercises: WorkoutExercise[] = [];
   category?: Category;
   bodyPart?: BodyPart;
+
 }

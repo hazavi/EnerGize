@@ -1,60 +1,171 @@
-<div class="modal-overlay" *ngIf="isOpen">
-    <div class="modal-content">
-        <h2>Create Workout</h2>
-
-        <label>Workout Name:</label>
-        <input type="text" [(ngModel)]="workoutName" />
-
-        <label>Description:</label>
-        <textarea [(ngModel)]="description"></textarea>
-
-        <!-- Add Exercise Button -->
-        <button class="add-exercise-btn" (click)="openExerciseModal()">+ Add Exercise</button>
-
-        <!-- Selected Exercises Section -->
-        <div *ngIf="workoutExercises.length > 0">
-            <h3>Selected Exercises</h3>
-            <div *ngFor="let exercise of workoutExercises; let i = index" class="selected-exercise">
-                <span>{{ exercise.exercise?.exerciseName }}</span>
-                <button class="remove-btn" (click)="toggleExerciseSelection(exercise.exercise!)">✖</button>
-
-                <div *ngFor="let set of exercise.sets; let j = index" class="set-item">
-                    <span>Set {{ j + 1 }}:</span>
-                    <input type="number" [(ngModel)]="set.reps" placeholder="Reps" />
-                    <input type="number" [(ngModel)]="set.kg" placeholder="Kg" />
-                    <button class="remove-set-btn" (click)="removeSet(i, j)">-</button>
-                </div>
-                <button class="add-set-btn" (click)="addSet(i)">+ Add Set</button>
-            </div>
+<div class="modal-overlay" *ngIf="isOpen" [@fadeAnimation]>
+    <div class="modal-content" [@slideAnimation]>
+        <div class="modal-header">
+            <h2>Create Workout</h2>
+            <button class="btn-icon close-btn" (click)="close.emit()">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
 
-        <!-- Modal Actions -->
-        <div class="modal-actions">
-            <button (click)="onSave()">Save</button>
-            <button (click)="onClose()">Cancel</button>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="workoutName">Workout Name</label>
+                <input type="text" id="workoutName" [(ngModel)]="workoutName" placeholder="Enter workout name"
+                    class="form-control" />
+            </div>
+
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" [(ngModel)]="description" placeholder="Enter workout description"
+                    class="form-control" rows="3"></textarea>
+            </div>
+
+            <!-- Add Exercise Section -->
+            <div class="add-exercise-section">
+                <button class="btn btn-primary add-exercise-btn" (click)="openExerciseModal()">
+                    <i class="fas fa-plus-circle"></i> Add Exercise
+                </button>
+            </div>
+
+            <!-- Selected Exercises Section -->
+            <div class="selected-exercises" *ngIf="workoutExercises.length > 0">
+                <h3>Selected Exercises</h3>
+                <div *ngFor="let exercise of workoutExercises; let i = index" class="exercise-card" [@fadeInAnimation]>
+                    <div class="exercise-header">
+                        <div class="exercise-info">
+                            <!-- Exercise GIF/Image -->
+                            <div class="exercise-thumbnail" *ngIf="exercise.exercise?.thumbnailBase64">
+                                <img [src]="'data:image/gif;base64,' + exercise.exercise?.thumbnailBase64"
+                                    alt="Exercise thumbnail" class="exercise-thumbnail"
+                                    (error)="handleImageError($event)" />
+                                <div class="placeholder" *ngIf="!exercise.exercise?.thumbnailBase64">
+                                    <i class="fas fa-dumbbell"></i>
+                                </div>
+                            </div>
+
+                            <div class="exercise-details">
+                                <h4 class="exercise-name">{{ exercise.exercise?.exerciseName }}</h4>
+                                <span class="exercise-category" *ngIf="exercise.exercise?.category">
+                                    <i class="fas fa-tag"></i> {{ exercise.exercise?.category }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <button class="btn-icon remove-exercise-btn"
+                            (click)="toggleExerciseSelection(exercise.exercise!)" title="Remove Exercise">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+
+                    <!-- Sets Section -->
+                    <div class="sets-container">
+                        <div *ngFor="let set of exercise.sets; let j = index" class="set-row" [@fadeInAnimation]>
+                            <div class="set-number">Set {{ j + 1 }}</div>
+
+                            <div class="set-inputs">
+                                <div class="input-group">
+                                    <label for="reps-{{i}}-{{j}}">Reps</label>
+                                    <input type="number" id="reps-{{i}}-{{j}}" [(ngModel)]="set.reps" placeholder="Reps"
+                                        class="form-control" min="0" />
+                                </div>
+
+                                <div class="input-group">
+                                    <label for="weight-{{i}}-{{j}}">Weight (kg)</label>
+                                    <input type="number" id="weight-{{i}}-{{j}}" [(ngModel)]="set.kg" placeholder="Kg"
+                                        class="form-control" min="0" />
+                                </div>
+
+                                <button class="btn-icon remove-set-btn" (click)="removeSet(i, j)" title="Remove Set">
+                                    <i class="fas fa-minus-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-outline add-set-btn" (click)="addSet(i)">
+                            <i class="fas fa-plus"></i> Add Set
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary" (click)="close.emit()">Cancel</button>
+            <button class="btn btn-success" (click)="saveWorkout()"
+                [disabled]="!workoutName || workoutExercises.length === 0">
+                <i class="fas fa-save"></i> Save Workout
+            </button>
         </div>
     </div>
 </div>
 
 <!-- Exercise Selection Modal -->
-<div class="modal-overlay" *ngIf="isExerciseModalOpen">
-    <div class="modal-content">
-        <h2>Select Exercises</h2>
-
-        <div *ngIf="isLoading">
-            <p>Loading exercises...</p>
+<div class="modal-overlay exercise-modal" *ngIf="isExerciseModalOpen" [@fadeAnimation]>
+    <div class="modal-content" [@slideAnimation]>
+        <div class="modal-header">
+            <h2>Select Exercises</h2>
+            <button class="btn-icon close-btn" (click)="close.emit()">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
 
-        <div *ngIf="!isLoading">
-            <div class="exercise-list">
-                <div *ngFor="let exercise of exercises" class="exercise-item"
-                    [class.selected]="selectedExercises.includes(exercise)" (click)="toggleExerciseSelection(exercise)">
-                    {{ exercise.exerciseName }}
+        <div class="modal-body">
+            <!-- Search Bar -->
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" [(ngModel)]="searchTerm" placeholder="Search exercises..." class="search-input" />
+            </div>
+
+            <!-- Loading State -->
+            <div class="loading-container" *ngIf="isLoading">
+                <div class="spinner"></div>
+                <p>Loading exercises...</p>
+            </div>
+
+            <!-- Exercise List -->
+            <div class="exercise-grid" *ngIf="!isLoading">
+                <div *ngFor="let exercise of filteredExercises" class="exercise-item"
+                    [class.selected]="selectedExercises.includes(exercise)" (click)="toggleExerciseSelection(exercise)"
+                    [@fadeInAnimation]>
+
+                    <!-- Exercise GIF/Image -->
+                    <div class="exercise-thumbnail">
+                        <img *ngIf="exercise.thumbnailBase64"
+                            [src]="'data:image/gif;base64,' + exercise.thumbnailBase64"
+                            [alt]="exercise.exerciseName || 'Exercise Thumbnail'" (error)="handleImageError($event)" />
+                        <div class="placeholder" *ngIf="!exercise.thumbnailBase64">
+                            <i class="fas fa-dumbbell"></i>
+                        </div>
+                    </div>
+
+                    <div class="exercise-info">
+                        <h4>{{ exercise.exerciseName }}</h4>
+                        <span class="category" *ngIf="exercise.category">
+                            <i class="fas fa-tag"></i> {{ exercise.category }}
+                        </span>
+                    </div>
+
+                    <div class="selection-indicator">
+                        <i class="fas"
+                            [ngClass]="selectedExercises.includes(exercise) ? 'fa-check-circle' : 'fa-circle'"></i>
+                    </div>
                 </div>
             </div>
 
-            <button class="confirm-btn" (click)="confirmExerciseSelection()">Add</button>
-            <button class="cancel-btn" (click)="closeExerciseModal()">Cancel</button>
+            <!-- Empty State -->
+            <div class="empty-state" *ngIf="!isLoading && filteredExercises?.length === 0">
+                <i class="fas fa-search"></i>
+                <p>No exercises found</p>
+                <p class="hint">Try a different search term</p>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="close.emit()">Cancel</button>
+            <button class="btn btn-primary" (click)="confirmExerciseSelection()"
+                [disabled]="selectedExercises.length === 0">
+                Add Selected <span class="selected-count" *ngIf="selectedExercises.length > 0">({{
+                    selectedExercises.length }})</span>
+            </button>
         </div>
     </div>
 </div>

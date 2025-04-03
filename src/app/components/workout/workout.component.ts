@@ -78,14 +78,21 @@ export class WorkoutComponent implements OnInit {
   saveWorkout(newWorkout: Workout): void {
     if (!this.selectedTemplate) return;
 
-    this.workoutService.create(newWorkout).subscribe((workout) => {
-      this.selectedTemplate!.workouts.push({
-        ...workout,
-        workoutExercises: [],
-        menuOpen: false,
-      });
-      this.isWorkoutModalOpen = false;
-    });
+    this.workoutService.create(newWorkout).subscribe(
+      (workout) => {
+        console.log('Workout created successfully:', workout); // Debugging log
+        this.selectedTemplate!.workouts.push({
+          ...workout,
+          workoutExercises: workout.workoutExercises || [],
+          menuOpen: false,
+        });
+        this.isWorkoutModalOpen = false;
+      },
+      (error) => {
+        console.error('Error creating workout:', error);
+        alert('Failed to create workout. Please try again.');
+      }
+    );
   }
 
   addTemplate(): void {

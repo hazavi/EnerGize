@@ -18,13 +18,22 @@
   --success: #10b981;
   --border: #e5e7eb;
   --admin-card-clr: #0d041b;
+
+  --transition-speed: 0.3s;
+  --primary-color: #4c6ef5;
+  --secondary-color: #495057;
+  --success-color: #37b24d;
+  --danger-color: #fa5252;
+  --light-color: #f8f9fa;
+  --dark-color: #343a40;
+  --border-radius: 6px;
+  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 body {
   font-family: Poppins, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.5rem;
   background-color: var(--base-clr);
   color: var(--text-clr);
-  
 }
 
 html,
