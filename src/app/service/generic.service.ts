@@ -3,6 +3,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
+import { Workout } from '../models/workout';
+import { CreateWorkoutExercisePayload } from '../models/workoutexercisepayload';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -41,17 +43,25 @@ export class GenericService<Model> {
   }
 
   create(endPoint: string, model: Model): Observable<Model> {
-    return this.http.post<Model>(`${this.url}/${endPoint}`, model, {
-      headers: this.getHeaders(),
+    const headers = new HttpHeaders({
+      Authorization: this.getHeaders().get('Authorization') ?? '',
     });
+    return this.http.post<Model>(`${this.url}/${endPoint}`, model, { headers });
+  }
+  create2<T, R>(endPoint: string, model: T): Observable<R> {
+    const headers = new HttpHeaders({
+      Authorization: this.getHeaders().get('Authorization') ?? '',
+    });
+    return this.http.post<R>(`${this.url}/${endPoint}`, model, { headers });
   }
 
-  create2<T>(endPoint: string, model: T): Observable<T> {
-    return this.http.post<T>(`${this.url}/${endPoint}`, model, {
-      headers: this.getHeaders(),
+  createWithFile(endPoint: string, formData: FormData): Observable<any> {
+    // Use the 'multipart/form-data' content type for file uploads
+    const headers = new HttpHeaders({
+      Authorization: this.getHeaders().get('Authorization') ?? '',
     });
+    return this.http.post(`${this.url}/${endPoint}`, formData, { headers });
   }
-
   updatebyid(endPoint: string, id: number, model: Model): Observable<Model> {
     return this.http.put<Model>(`${this.url}/${endPoint}/${id}`, model, {
       headers: this.getHeaders(),
@@ -70,13 +80,5 @@ export class GenericService<Model> {
 
   login(data: any): Observable<any> {
     return this.http.post(`${this.url}/users/login`, data);
-  }
-
-  createWithFile(endPoint: string, formData: FormData): Observable<any> {
-    // Use the 'multipart/form-data' content type for file uploads
-    const headers = new HttpHeaders({
-      Authorization: this.getHeaders().get('Authorization') ?? '',
-    });
-    return this.http.post(`${this.url}/${endPoint}`, formData, { headers });
   }
 }
