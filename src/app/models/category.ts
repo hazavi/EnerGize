@@ -1,7 +1,7 @@
-import { Exercise } from './exercise';
+import { Exercise } from "./exercise";
 
-export class Category {
-  categoryId: number = 0;
-  categoryName: string = '';
-  exercises: Exercise[] = [];
+export interface Category {
+  categoryId: number;
+  categoryName: string;
+  exercises: Exercise[];
 }

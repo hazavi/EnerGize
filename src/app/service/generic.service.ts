@@ -2,83 +2,51 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { AuthService } from './auth.service';
-import { Workout } from '../models/workout';
-import { CreateWorkoutExercisePayload } from '../models/workoutexercisepayload';
-
-const httpOptions = {
-  headers: new HttpHeaders({
-    'Content-Type': 'application/json',
-  }),
-};
 
 @Injectable({
   providedIn: 'root',
 })
-export class GenericService<Model> {
-  private readonly url: string = environment.apiUrl;
+export class GenericService<T> {
+  private baseUrl = `${environment.supabaseUrl}/rest/v1`;
 
-  constructor(private http: HttpClient, private authService: AuthService) {}
+  constructor(private http: HttpClient) {}
 
-  // ✅ Create function to get auth headers
+  getAll(endpoint: string): Observable<T[]> {
+    const headers = this.getHeaders();
+    return this.http.get<T[]>(`${this.baseUrl}/${endpoint}`, { headers });
+  }
+
+  getById(endpoint: string, id: number): Observable<T> {
+    const headers = this.getHeaders();
+    return this.http.get<T>(`${this.baseUrl}/${endpoint}?id=eq.${id}`, {
+      headers,
+    });
+  }
+
+  create(endpoint: string, data: T): Observable<T> {
+    const headers = this.getHeaders();
+    return this.http.post<T>(`${this.baseUrl}/${endpoint}`, data, { headers });
+  }
+
+  updateById(endpoint: string, id: number, data: T): Observable<T> {
+    const headers = this.getHeaders();
+    return this.http.patch<T>(`${this.baseUrl}/${endpoint}?id=eq.${id}`, data, {
+      headers,
+    });
+  }
+
+  deleteById(endpoint: string, id: number): Observable<void> {
+    const headers = this.getHeaders();
+    return this.http.delete<void>(`${this.baseUrl}/${endpoint}?id=eq.${id}`, {
+      headers,
+    });
+  }
+
+
   private getHeaders(): HttpHeaders {
-    const token = this.authService.getToken();
     return new HttpHeaders({
-      'Content-Type': 'application/json',
-      Authorization: token ? `Bearer ${token}` : '',
+      apikey: environment.supabaseAnonKey,
+      Authorization: `Bearer ${environment.supabaseAnonKey}`,
     });
-  }
-
-  // ✅ Include headers in all API calls
-  getAll(endPoint: string): Observable<Model[]> {
-    return this.http.get<Model[]>(`${this.url}/${endPoint}`, {
-      headers: this.getHeaders(),
-    });
-  }
-
-  getbyid(endPoint: string, id: string): Observable<Model> {
-    return this.http.get<Model>(`${this.url}/${endPoint}/${id}`, {
-      headers: this.getHeaders(),
-    });
-  }
-
-  create(endPoint: string, model: Model): Observable<Model> {
-    const headers = new HttpHeaders({
-      Authorization: this.getHeaders().get('Authorization') ?? '',
-    });
-    return this.http.post<Model>(`${this.url}/${endPoint}`, model, { headers });
-  }
-  create2<T, R>(endPoint: string, model: T): Observable<R> {
-    const headers = new HttpHeaders({
-      Authorization: this.getHeaders().get('Authorization') ?? '',
-    });
-    return this.http.post<R>(`${this.url}/${endPoint}`, model, { headers });
-  }
-
-  createWithFile(endPoint: string, formData: FormData): Observable<any> {
-    // Use the 'multipart/form-data' content type for file uploads
-    const headers = new HttpHeaders({
-      Authorization: this.getHeaders().get('Authorization') ?? '',
-    });
-    return this.http.post(`${this.url}/${endPoint}`, formData, { headers });
-  }
-  updatebyid(endPoint: string, id: number, model: Model): Observable<Model> {
-    return this.http.put<Model>(`${this.url}/${endPoint}/${id}`, model, {
-      headers: this.getHeaders(),
-    });
-  }
-
-  deletebyid(endPoint: string, id: number): Observable<void> {
-    return this.http.delete<void>(`${this.url}/${endPoint}/${id}`, {
-      headers: this.getHeaders(),
-    });
-  }
-
-  register(data: any): Observable<any> {
-    return this.http.post(`${this.url}/users/register`, data);
-  }
-
-  login(data: any): Observable<any> {
-    return this.http.post(`${this.url}/users/login`, data);
   }
 }

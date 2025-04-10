@@ -14,7 +14,6 @@
                     class="form-control" />
             </div>
 
-
             <div class="form-group">
                 <label for="description">Description</label>
                 <textarea id="description" [(ngModel)]="description" placeholder="Enter workout description"
@@ -31,36 +30,36 @@
             <!-- Selected Exercises Section -->
             <div class="selected-exercises" *ngIf="workoutExercises.length > 0">
                 <h3>Selected Exercises</h3>
-                <div *ngFor="let exercise of workoutExercises; let i = index" class="exercise-card" [@fadeInAnimation]>
+                <div *ngFor="let item of workoutExercises; let i = index" class="exercise-card" [@fadeInAnimation]>
                     <div class="exercise-header">
                         <div class="exercise-info">
-                            <!-- Exercise GIF/Image -->
-                            <div class="exercise-thumbnail" *ngIf="exercise.exercise?.thumbnailBase64">
-                                <img [src]="'data:image/gif;base64,' + exercise.exercise?.thumbnailBase64"
-                                    alt="Exercise thumbnail" class="exercise-thumbnail"
-                                    (error)="handleImageError($event)" />
-                                <div class="placeholder" *ngIf="!exercise.exercise?.thumbnailBase64">
-                                    <i class="fas fa-dumbbell"></i>
-                                </div>
+                            <!-- Exercise Thumbnail -->
+                            <div class="exercise-thumbnail" *ngIf="item.exercise.thumbnail">
+                                <img [src]="'data:image/gif;base64,' + item.exercise.thumbnail" alt="Exercise thumbnail"
+                                    class="exercise-thumbnail" (error)="handleImageError($event)" />
+                            </div>
+                            <div class="placeholder" *ngIf="!item.exercise.thumbnail">
+                                <i class="fas fa-dumbbell"></i>
                             </div>
 
                             <div class="exercise-details">
-                                <h4 class="exercise-name">{{ exercise.exercise?.exerciseName }}</h4>
-                                <span class="exercise-category" *ngIf="exercise.exercise?.category">
-                                    <i class="fas fa-tag"></i> {{ exercise.exercise?.category }}
+                                <h4 class="exercise-name">{{ item.exercise.exerciseName }}</h4>
+                                <span class="exercise-category" *ngIf="item.exercise.categoryId">
+                                    <i class="fas fa-tag"></i> Category ID: {{ item.exercise.categoryId }}
                                 </span>
                             </div>
                         </div>
 
-                        <button class="btn-icon remove-exercise-btn"
-                            (click)="toggleExerciseSelection(exercise.exercise!)" title="Remove Exercise">
+                        <button class="btn-icon remove-exercise-btn" (click)="toggleExerciseSelection(item.exercise)"
+                            title="Remove Exercise">
                             <i class="fas fa-trash-alt"></i>
                         </button>
                     </div>
 
                     <!-- Sets Section -->
                     <div class="sets-container">
-                        <div *ngFor="let set of exercise.sets; let j = index" class="set-row" [@fadeInAnimation]>
+                        <div *ngFor="let set of item.workoutExercise.sets; let j = index" class="set-row"
+                            [@fadeInAnimation]>
                             <div class="set-number">Set {{ j + 1 }}</div>
 
                             <div class="set-inputs">
@@ -71,10 +70,15 @@
                                 </div>
 
                                 <div class="input-group">
-                                    <label for="weight-{{i}}-{{j}}">Weight (kg)</label>
-                                    <input type="number" id="weight-{{i}}-{{j}}" [(ngModel)]="set.kg" placeholder="Kg"
-                                        class="form-control" min="0" />
+                                    <label for="weight-{{i}}-{{j}}">Weight ({{ set.weightUnit }})</label>
+                                    <input type="number" id="weight-{{i}}-{{j}}" [(ngModel)]="set.weight"
+                                        placeholder="Weight" class="form-control" min="0" />
                                 </div>
+
+                                <button class="btn-icon toggle-weight-unit-btn" (click)="toggleWeightUnit(set)"
+                                    title="Toggle Weight Unit">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </button>
 
                                 <button class="btn-icon remove-set-btn" (click)="removeSet(i, j)" title="Remove Set">
                                     <i class="fas fa-minus-circle"></i>
@@ -103,7 +107,7 @@
     <div class="modal-content" [@slideAnimation]>
         <div class="modal-header">
             <h2>Select Exercises</h2>
-            <button class="btn-icon close-btn" (click)="close.emit()">
+            <button class="btn-icon close-btn" (click)="closeExerciseModal()">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -127,20 +131,19 @@
                     [class.selected]="selectedExercises.includes(exercise)" (click)="toggleExerciseSelection(exercise)"
                     [@fadeInAnimation]>
 
-                    <!-- Exercise GIF/Image -->
+                    <!-- Exercise Thumbnail -->
                     <div class="exercise-thumbnail">
-                        <img *ngIf="exercise.thumbnailBase64"
-                            [src]="'data:image/gif;base64,' + exercise.thumbnailBase64"
+                        <img *ngIf="exercise.thumbnail" [src]="'data:image/gif;base64,' + exercise.thumbnail"
                             [alt]="exercise.exerciseName || 'Exercise Thumbnail'" (error)="handleImageError($event)" />
-                        <div class="placeholder" *ngIf="!exercise.thumbnailBase64">
+                        <div class="placeholder" *ngIf="!exercise.thumbnail">
                             <i class="fas fa-dumbbell"></i>
                         </div>
                     </div>
 
                     <div class="exercise-info">
                         <h4>{{ exercise.exerciseName }}</h4>
-                        <span class="category" *ngIf="exercise.category">
-                            <i class="fas fa-tag"></i> {{ exercise.category }}
+                        <span class="category" *ngIf="exercise.categoryId">
+                            <i class="fas fa-tag"></i> Category ID: {{ exercise.categoryId }}
                         </span>
                     </div>
 
@@ -160,7 +163,7 @@
         </div>
 
         <div class="modal-footer">
-            <button class="btn btn-secondary" (click)="close.emit()">Cancel</button>
+            <button class="btn btn-secondary" (click)="closeExerciseModal()">Cancel</button>
             <button class="btn btn-primary" (click)="confirmExerciseSelection()"
                 [disabled]="selectedExercises.length === 0">
                 Add Selected <span class="selected-count" *ngIf="selectedExercises.length > 0">({{

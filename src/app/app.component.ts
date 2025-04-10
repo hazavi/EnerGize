@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { Router, RouterModule, RouterOutlet } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { LoadingComponent } from './components/loading/loading.component';
@@ -10,7 +10,7 @@ import { LoginResponse } from './models/loginresponse';
   standalone: true,
   imports: [RouterOutlet, CommonModule, RouterModule, LoadingComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css',
+  styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
   title = 'EnerGize';
@@ -22,7 +22,11 @@ export class AppComponent {
   isProfileMenuOpen = false; // Controls submenu visibility
   isLoading: boolean = false; // Loading state
 
-  constructor(private router: Router, private snackBar: MatSnackBar) {}
+  constructor(
+    private router: Router,
+    private snackBar: MatSnackBar,
+    private cdr: ChangeDetectorRef // Inject ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     this.updateProfileUI(); // Update UI based on login status
@@ -44,42 +48,44 @@ export class AppComponent {
 
   // Update the UI based on login status
   updateProfileUI() {
-    const loginResponse = localStorage.getItem('loginResponse');
-    if (loginResponse) {
-      // Parse the login response from localStorage
-      this.loginResponse = JSON.parse(loginResponse);
+    try {
+      const loginResponse = localStorage.getItem('loginResponse');
+      if (loginResponse) {
+        // Parse the login response from localStorage
+        this.loginResponse = JSON.parse(loginResponse);
 
-      // Assign values to component properties
-      this.username = this.loginResponse?.username || 'Profile';
-      this.userId = this.loginResponse?.userId || null;
+        // Assign values to component properties
+        this.username = this.loginResponse?.username || 'Profile';
+        this.userId = this.loginResponse?.userId || null;
 
-      // Check if the user is an admin
-      this.isUserAdmin = this.loginResponse?.role === 'admin';
-    } else {
-      // Reset UI for logged-out state
-      this.username = null;
-      this.userId = null;
-      this.isUserAdmin = false;
-      this.loginResponse = null;
-      this.isProfileMenuOpen = false; // Ensure submenu is closed
+        // Check if the user is an admin
+        this.isUserAdmin = this.loginResponse?.role === 'admin';
+      } else {
+        this.resetUI(); // Reset UI for logged-out state
+      }
+
+      // Trigger change detection to update the UI
+      this.cdr.detectChanges();
+    } catch (error) {
+      console.error('Error parsing login response:', error);
+      this.resetUI(); // Reset UI in case of an error
     }
   }
 
-  // Check if the user is an admin
-  isAdmin(): boolean {
-    return this.loginResponse?.role === 'admin'; // Check the role from loginResponse
+  // Reset UI for logged-out state
+  private resetUI() {
+    this.username = null;
+    this.userId = null;
+    this.isUserAdmin = false;
+    this.loginResponse = null;
+    this.isProfileMenuOpen = false; // Ensure submenu is closed
   }
 
   // Logout function
   logout() {
     this.isLoading = true;
     localStorage.clear(); // Clear all localStorage data
-    this.username = null;
-    this.userId = null;
-    this.isUserAdmin = false;
-    this.loginResponse = null;
-    this.isProfileMenuOpen = false; // Close submenu
-    this.updateProfileUI(); // Reset UI
+    this.resetUI(); // Reset UI
 
     setTimeout(() => {
       this.router.navigate(['/login']).then(() => {
@@ -90,7 +96,10 @@ export class AppComponent {
           horizontalPosition: 'center',
           panelClass: ['danger-snackbar'],
         });
+
+        // Trigger change detection to update the UI
+        this.cdr.detectChanges();
       });
-    }, 2000); 
+    }, 2000);
   }
 }

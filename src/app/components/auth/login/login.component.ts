@@ -6,43 +6,29 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { LoginModel } from '../../../models/loginmodel';
 import { Router, RouterModule } from '@angular/router';
-import { GenericService } from '../../../service/generic.service';
 import { CommonModule } from '@angular/common';
-import { LoginResponse } from '../../../models/loginresponse';
-import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { LoadingComponent } from '../../loading/loading.component';
+import { supabase } from '../../../service/supabase.service'; // Import Supabase client
+import { LoginResponse } from '../../../models/loginresponse'; // Import LoginResponse interface
 
 @Component({
   selector: 'app-login',
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    RouterModule,
-    MatProgressSpinnerModule,
-    LoadingComponent,
-  ],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css',
+  styleUrls: ['./login.component.css'],
 })
 export class LoginComponent {
   loginForm: FormGroup;
   errorMessage: string = '';
   successMessage: string = '';
   showPassword: boolean = false; // Controls password visibility
-  loginResponse: LoginResponse | null = null;
-  isLoggedIn: boolean = false;
   isLoading: boolean = false; // Loading state
+  loginResponse: LoginResponse | null = null; // Stores the login response
 
   constructor(
     private fb: FormBuilder,
-    private genericService: GenericService<LoginModel>,
     private router: Router,
-    private dialog: MatDialog,
     private snackBar: MatSnackBar
   ) {
     this.loginForm = this.fb.group({
@@ -51,44 +37,41 @@ export class LoginComponent {
     });
   }
 
-  checkLoginStatus() {
-    this.isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    if (this.isLoggedIn) {
-      this.router.navigate(['/home']);
-    }
-  }
-
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword; // Toggle password visibility
   }
 
-  onSubmit() {
+  async onSubmit() {
     if (this.loginForm.invalid) {
       return;
     }
 
     this.isLoading = true; // Start loading
 
-    const loginData: LoginModel = {
-      email: this.loginForm.value.email,
-      password: this.loginForm.value.password,
-    };
+    const loginData = this.loginForm.value;
 
-    this.genericService.login(loginData).subscribe(
-      (response: any) => {
-        
-        if (response.token) {
-          // ✅ Store the token for authentication
-          localStorage.setItem('authToken', response.token);
-        }
+    try {
+      // Call Supabase to handle login
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: loginData.email,
+        password: loginData.password,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.session) {
+        // ✅ Store the token for authentication
+        localStorage.setItem('authToken', data.session.access_token);
 
         // Map the API response to the LoginResponse interface
         this.loginResponse = {
-          userId: response.user.id, // Extract user ID from the response
-          username: response.user.username, // Extract username from the response
-          email: response.user.email, // Extract email from the response
-          role: response.role, // Extract role from the response
-          token: response.token, // Extract token from the response
+          userId: data.user.id, // Extract user ID from the response
+          username: data.user.user_metadata['displayName'] || 'User', // Extract username from metadata
+          email: data.user.email || '', // Extract email from the response or use an empty string as fallback
+          role: data.user['role'] || 'user', // Extract role from metadata
+          token: data.session.access_token, // Extract token from the session
         };
 
         // Save the entire login response as JSON in localStorage
@@ -96,7 +79,9 @@ export class LoginComponent {
           'loginResponse',
           JSON.stringify(this.loginResponse)
         );
-        localStorage.setItem('isLoggedIn', 'true');
+
+        this.errorMessage = '';
+        this.successMessage = 'You have successfully logged in!';
 
         // Show success snackbar
         const snackBarRef = this.snackBar.open(
@@ -117,13 +102,13 @@ export class LoginComponent {
             window.location.reload();
           });
         });
-      },
-      (error: any) => {
-        this.isLoading = false; // Stop loading
-        this.errorMessage = 'Invalid credentials or an error occurred.';
-        this.successMessage = '';
-        console.error('Login failed:', error);
       }
-    );
+    } catch (error: any) {
+      this.isLoading = false; // Stop loading
+      this.errorMessage =
+        error.message || 'Invalid credentials or an error occurred.';
+      this.successMessage = '';
+      console.error('Login failed:', error);
+    }
   }
 }

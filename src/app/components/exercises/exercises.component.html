@@ -1,65 +1,60 @@
-<app-loading *ngIf="isLoading" class="loading-spinner"></app-loading>
+<div class="exercises-container">
+  <h2 class="title">Exercises</h2>
 
-<div class="exercise-container" *ngIf="!isLoading">
-    <div *ngIf="exercises.length > 0; else noExercises">
-      <h2 class="section-title">Exercises</h2>
-      
-      <div class="exercise-grid">
-        <!-- Display paginated exercises -->
-        <div class="exercise-card" *ngFor="let exercise of paginatedExercises">
-          <div class="thumbnail-wrapper" *ngIf="exercise.thumbnailBase64">
-            <img 
-              [src]="'data:image/gif;base64,' + exercise.thumbnailBase64" 
-              alt="Exercise thumbnail"
-              class="exercise-thumbnail" 
-              (error)="handleImageError($event)" 
-            />
-          </div>
-          
-          <div class="exercise-content">
-            <h3 class="exercise-title">{{ exercise.exerciseName }}</h3>
-            
-            <div class="exercise-meta">
-              <div class="meta-item">
-                <i class="meta-icon fas fa-dumbbell"></i>
-                <span class="meta-value">{{ getCategoryName(exercise.categoryId) }}</span>
-              </div>
-              
-              <div class="meta-item">
-                <i class="meta-icon fas fa-child"></i>
-                <span class="meta-value">{{ getBodyPartName(exercise.bodyPartId) }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="loading-container">
+    <app-loading></app-loading>
+  </div>
+
+  <!-- Exercises List -->
+  <div *ngIf="!isLoading && exercises.length > 0" class="exercises-grid">
+    <div *ngFor="let exercise of paginatedExercises" class="exercise-card">
+      <!-- Exercise Thumbnail -->
+      <div class="thumbnail">
+        <img
+          [src]="exercise.thumbnail || 'assets/default-thumbnail.jpg'"
+          [alt]="exercise.exerciseName"
+          (error)="handleImageError($event)"
+        />
       </div>
-  
-      <!-- Pagination Controls -->
-      <div class="pagination-container" *ngIf="totalPages > 1">
-        <button 
-          class="pagination-button" 
-          [disabled]="currentPage === 1" 
-          (click)="changePageAndScroll(currentPage - 1)">
-          <i class="fa-solid fa-chevron-left"></i>
-        </button>
 
-        <span class="pagination-info">
-          Page {{ currentPage }} of {{ totalPages }}
-        </span>
-
-        <button 
-          class="pagination-button" 
-          [disabled]="currentPage === totalPages" 
-          (click)="changePageAndScroll(currentPage + 1)">
-          <i class="fa-solid fa-chevron-right"></i>
-        </button>
+      <!-- Exercise Details -->
+      <div class="details">
+        <h3 class="exercise-name">{{ exercise.exerciseName }}</h3>
+        <p class="body-part">
+          <strong>Body Part:</strong> {{ getBodyPartName(exercise.bodyPartId) }}
+        </p>
+        <p class="category">
+          <strong>Category:</strong> {{ getCategoryName(exercise.categoryId) }}
+        </p>
+        <p class="instructions">
+          <strong>Instructions:</strong> {{ exercise.instructions || 'No instructions available.' }}
+        </p>
       </div>
     </div>
+  </div>
 
+  <!-- No Exercises Found -->
+  <div *ngIf="!isLoading && exercises.length === 0" class="no-exercises">
+    <p>No exercises found.</p>
+  </div>
 
-  <ng-template #noExercises>
-    <div class="no-exercises">
-      <app-loading></app-loading>
-    </div>
-  </ng-template>
+  <!-- Pagination -->
+  <div *ngIf="!isLoading && totalPages > 1" class="pagination">
+    <button
+      class="pagination-button"
+      [disabled]="currentPage === 1"
+      (click)="changePageAndScroll(currentPage - 1)"
+    >
+      Previous
+    </button>
+    <span class="page-info">Page {{ currentPage }} of {{ totalPages }}</span>
+    <button
+      class="pagination-button"
+      [disabled]="currentPage === totalPages"
+      (click)="changePageAndScroll(currentPage + 1)"
+    >
+      Next
+    </button>
+  </div>
 </div>

@@ -1,4 +1,7 @@
 export interface Set {
+  id: number;
+  workoutexerciseId: number;
   reps: number;
-  kg: number;
+  weight: number;
+  weightUnit: 'kg' | 'lbs';
 }

@@ -1,13 +1,13 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { GenericService } from '../../service/generic.service'; // Import GenericService
 import { Workout } from '../../models/workout';
 import { WorkoutExercise } from '../../models/workoutexercise';
 import { Exercise } from '../../models/exercise';
-import { GenericService } from '../../service/generic.service';
+import { Set } from '../../models/set';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { CreateWorkoutExercisePayload } from '../../models/workoutexercisepayload';
 
 @Component({
   selector: 'app-workout-modal',
@@ -28,10 +28,13 @@ export class WorkoutModalComponent {
   @Input() isOpen: boolean = false;
   @Output() close = new EventEmitter<void>();
   @Output() save = new EventEmitter<Workout>();
+  @Input() workoutExercises: {
+    workoutExercise: WorkoutExercise;
+    exercise: Exercise;
+  }[] = [];
 
   workoutName: string = '';
   description: string = '';
-  workoutExercises: WorkoutExercise[] = [];
 
   exercises: Exercise[] = [];
   selectedExercises: Exercise[] = [];
@@ -41,9 +44,7 @@ export class WorkoutModalComponent {
   searchTerm: string = '';
 
   constructor(
-    private exerciseService: GenericService<Exercise>,
-    private workoutService: GenericService<Workout>,
-    private workoutExerciseService: GenericService<CreateWorkoutExercisePayload>,
+    private genericService: GenericService<any>,
     private sanitizer: DomSanitizer
   ) {}
 
@@ -59,8 +60,8 @@ export class WorkoutModalComponent {
         exercise.exerciseName
           .toLowerCase()
           .includes(this.searchTerm.toLowerCase()) ||
-        (exercise.category &&
-          String(exercise.category)
+        (exercise.categoryId &&
+          String(exercise.categoryId)
             .toLowerCase()
             .includes(this.searchTerm.toLowerCase()))
     );
@@ -68,8 +69,10 @@ export class WorkoutModalComponent {
 
   loadExercises(): void {
     this.isLoading = true;
-    this.exerciseService.getAll('exercises').subscribe(
-      (data) => {
+
+    // Fetch exercises using GenericService
+    this.genericService.getAll('exercises').subscribe(
+      (data: Exercise[]) => {
         this.exercises = data;
         this.isLoading = false;
       },
@@ -106,26 +109,44 @@ export class WorkoutModalComponent {
 
   confirmExerciseSelection(): void {
     this.workoutExercises = this.selectedExercises.map((exercise) => ({
-      workoutId: 0, // Placeholder, will be updated after workout creation
-      exerciseId: exercise.exerciseId,
-      sets: [
-        {
-          setId: Date.now(), // Unique identifier for the set
-          reps: 0, // Default value
-          kg: 0, // Default value
-        },
-      ],
-      exercise: exercise, // Ensure the exercise object is assigned here
+      workoutExercise: {
+        id: 0, // Placeholder, will be updated after workout creation
+        workoutId: 0, // Placeholder, will be updated after workout creation
+        exerciseId: exercise.exerciseId, // Access exerciseId from Exercise
+        sets: [
+          {
+            id: 0, // Placeholder, will be updated after workout creation
+            workoutexerciseId: 0, // Placeholder, will be updated after workout creation
+            reps: 10, // Default reps
+            weight: 20, // Default weight
+            weightUnit: 'kg', // Default weight unit
+          },
+        ],
+      },
+      exercise: exercise, // Include the full Exercise object
     }));
     this.closeExerciseModal();
   }
 
   removeSet(exerciseIndex: number, setIndex: number): void {
-    this.workoutExercises[exerciseIndex].sets.splice(setIndex, 1);
+    this.workoutExercises[exerciseIndex].workoutExercise.sets.splice(
+      setIndex,
+      1
+    );
   }
 
   addSet(exerciseIndex: number): void {
-    this.workoutExercises[exerciseIndex].sets.push({ reps: 0, kg: 0 });
+    this.workoutExercises[exerciseIndex].workoutExercise.sets.push({
+      id: 0, // Placeholder
+      workoutexerciseId: 0, // Placeholder
+      reps: 10, // Default reps
+      weight: 20, // Default weight
+      weightUnit: 'kg', // Default weight unit
+    });
+  }
+
+  toggleWeightUnit(set: Set): void {
+    set.weightUnit = set.weightUnit === 'kg' ? 'lbs' : 'kg';
   }
 
   handleImageError(event: Event): void {
@@ -147,53 +168,58 @@ export class WorkoutModalComponent {
 
     if (
       this.workoutExercises.some(
-        (we) =>
-          we.sets.length === 0 ||
-          we.sets.some((set) => set.reps <= 0 || set.kg < 0)
+        (item) =>
+          item.workoutExercise.sets.length === 0 ||
+          item.workoutExercise.sets.some(
+            (set) => set.reps <= 0 || set.weight < 0
+          )
       )
     ) {
       alert(
-        'Each exercise must have at least one valid set (reps > 0, kg >= 0).'
+        'Each exercise must have at least one valid set (reps > 0, weight >= 0).'
       );
       return;
     }
 
     this.isLoading = true;
 
-    // Step 1: Create the workout
+    // Step 1: Insert the workout into the database
     const workoutPayload = {
       workoutName: this.workoutName,
       description: this.description || null,
-      workoutExercises: this.workoutExercises.map((we) => ({
-        exerciseId: we.exerciseId,
-        sets: we.sets.map((set) => ({
-          reps: set.reps,
-          kg: set.kg,
-        })),
-      })),
     };
 
-    console.log('Creating workout with exercises:', workoutPayload);
+    this.genericService.create('workouts', workoutPayload).subscribe(
+      (workout: Workout) => {
+        const workoutId = workout.workoutId;
 
-    this.workoutService
-      .create2<typeof workoutPayload, Workout>('workouts', workoutPayload)
-      .subscribe(
-        (workoutResponse) => {
-          console.log('Workout created successfully:', workoutResponse);
+        // Step 2: Insert workout exercises into the database
+        const workoutExercisesPayload = this.workoutExercises.map((item) => ({
+          workoutId: workoutId,
+          exerciseId: item.workoutExercise.exerciseId,
+          sets: item.workoutExercise.sets,
+        }));
 
-          // Step 2: Emit the saved workout and close the modal
-          this.isLoading = false;
-          this.close.emit();
-        },
-        (error) => {
-          this.isLoading = false;
-          console.error('Error creating workout:', error);
-          alert(
-            `Failed to create workout. Error: ${
-              error.message || 'Unknown error'
-            }`
+        this.genericService
+          .create('workout_exercises', workoutExercisesPayload)
+          .subscribe(
+            () => {
+              console.log('Workout and exercises created successfully.');
+              this.isLoading = false;
+              this.close.emit(); // Close the modal
+            },
+            (error) => {
+              console.error('Error creating workout exercises:', error);
+              alert('Failed to add exercises to workout.');
+              this.isLoading = false;
+            }
           );
-        }
-      );
+      },
+      (error) => {
+        console.error('Error creating workout:', error);
+        alert('Failed to create workout.');
+        this.isLoading = false;
+      }
+    );
   }
 }

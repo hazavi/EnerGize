@@ -1,48 +1,30 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BodyPart } from '../../../models/bodypart';
-import { Exercise } from '../../../models/exercise';
-import { Category } from '../../../models/category';
+import { Template } from '../../../models/template';
+import { Workout } from '../../../models/workout';
 import { GenericService } from '../../../service/generic.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgxPaginationModule } from 'ngx-pagination';
-import { EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-admin',
   imports: [
     CommonModule,
-    CommonModule,
+    FormsModule,
     ReactiveFormsModule,
-    FormsModule,
-    FormsModule,
     NgxPaginationModule,
   ],
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.css'],
 })
-export class AdminComponent {
-  currentView: string = 'bodyparts'; // Default view
-  bodyParts: BodyPart[] = [];
-  categories: Category[] = [];
-  exercises: Exercise[] = [];
-
-  newBodyPart: BodyPart = { bodyPartId: 0, bodyPartName: '' };
-  newCategory: Category = { categoryId: 0, categoryName: '', exercises: [] };
-  newExercise: Exercise = new Exercise();
-
-  isModalOpen: boolean = false; // Controls modal visibility
-
-  // Pagination variables
-  bodyPartsPage: number = 1;
-  categoriesPage: number = 1;
-  exercisesPage: number = 1;
-
-  fileName: string | null = null;
-  imagePreview: string | ArrayBuffer | null = null; // For thumbnail preview
-
-  @Output() fileSelected = new EventEmitter<File>();
+export class AdminComponent implements OnInit {
+  templates: Template[] = [];
+  workouts: Workout[] = [];
+  newTemplate: Template = { id: 0, name: '', description: '', workoutId: 0 };
+  currentView: string = 'templates'; // Default view
+  isModalOpen: boolean = false; // Modal state
+  templatesPage: number = 1; // Pagination for templates
 
   constructor(
     private genericService: GenericService<any>,
@@ -50,49 +32,92 @@ export class AdminComponent {
   ) {}
 
   ngOnInit(): void {
-    this.loadBodyParts();
-    this.loadCategories();
-    this.loadExercises();
+    this.loadTemplates();
+    this.loadWorkouts();
   }
 
-  // Load data methods
-  loadBodyParts(): void {
-    this.genericService.getAll('bodyparts').subscribe((data) => {
-      this.bodyParts = data;
-    });
+  // Load all templates
+  loadTemplates(): void {
+    this.genericService.getAll('templates').subscribe(
+      (data) => {
+        this.templates = data;
+      },
+      (error) => {
+        console.error('Error loading templates:', error);
+        this.snackBar.open('Failed to load templates.', 'Close', {
+          duration: 1500,
+          verticalPosition: 'top',
+          horizontalPosition: 'center',
+          panelClass: ['danger-snackbar'],
+        });
+      }
+    );
   }
 
-  loadCategories(): void {
-    this.genericService.getAll('categories').subscribe((data) => {
-      this.categories = data;
-    });
+  // Load all workouts
+  loadWorkouts(): void {
+    this.genericService.getAll('workouts').subscribe(
+      (data) => {
+        this.workouts = data;
+      },
+      (error) => {
+        console.error('Error loading workouts:', error);
+        this.snackBar.open('Failed to load workouts.', 'Close', {
+          duration: 1500,
+          verticalPosition: 'top',
+          horizontalPosition: 'center',
+          panelClass: ['danger-snackbar'],
+        });
+      }
+    );
   }
 
-  loadExercises(): void {
-    this.genericService.getAll('exercises').subscribe((data) => {
-      this.exercises = data;
-    });
+  // Get workout name by ID
+  getWorkoutName(workoutId: number): string {
+    const workout = this.workouts.find((w) => w.workoutId === workoutId);
+    return workout ? workout.workoutName : 'Unknown';
   }
 
-  // Add or update entry
-  addOrUpdateEntry(): void {
-    if (this.currentView === 'bodyparts') {
-      this.addOrUpdateBodyPart();
-    } else if (this.currentView === 'categories') {
-      this.addOrUpdateCategory();
-    } else if (this.currentView === 'exercises') {
-      this.addOrUpdateExercise();
+  // Open modal for adding or editing
+  openModal(view: string): void {
+    this.currentView = view;
+    this.isModalOpen = true;
+  }
+
+  // Close modal
+  closeModal(): void {
+    this.isModalOpen = false;
+  }
+
+  // Add or update a template
+  addOrUpdateTemplate(): void {
+    if (!this.newTemplate.name.trim()) {
+      this.snackBar.open('Template name is required.', 'Close', {
+        duration: 1500,
+        verticalPosition: 'top',
+        horizontalPosition: 'center',
+        panelClass: ['danger-snackbar'],
+      });
+      return;
     }
-    this.closeModal();
-  }
 
-  addOrUpdateBodyPart(): void {
-    if (this.newBodyPart.bodyPartId === 0) {
-      this.genericService.create('bodyparts', this.newBodyPart).subscribe(
+    if (!this.newTemplate.workoutId) {
+      this.snackBar.open('Please select a workout for the template.', 'Close', {
+        duration: 1500,
+        verticalPosition: 'top',
+        horizontalPosition: 'center',
+        panelClass: ['danger-snackbar'],
+      });
+      return;
+    }
+
+    if (this.newTemplate.id === 0) {
+      // Create a new template
+      this.genericService.create('templates', this.newTemplate).subscribe(
         () => {
-          this.loadBodyParts();
-          this.resetForm();
-          this.snackBar.open('Body Part created successfully!', 'Close', {
+          this.loadTemplates();
+          this.resetTemplateForm();
+          this.snackBar.open('Template created successfully!', 'Close', {
             duration: 1500,
             verticalPosition: 'top',
             horizontalPosition: 'center',
@@ -100,8 +125,8 @@ export class AdminComponent {
           });
         },
         (error) => {
-          console.error('Error creating Body Part:', error);
-          this.snackBar.open('Failed to create Body Part.', 'Close', {
+          console.error('Error creating template:', error);
+          this.snackBar.open('Failed to create template.', 'Close', {
             duration: 1500,
             verticalPosition: 'top',
             horizontalPosition: 'center',
@@ -110,57 +135,14 @@ export class AdminComponent {
         }
       );
     } else {
+      // Update an existing template
       this.genericService
-        .updatebyid('bodyparts', this.newBodyPart.bodyPartId, this.newBodyPart)
+        .updateById('templates', this.newTemplate.id, this.newTemplate)
         .subscribe(
           () => {
-            this.loadBodyParts();
-            this.resetForm();
-            this.snackBar.open('Body Part updated successfully!', 'Close', {
-              duration: 3000,
-            });
-          },
-          (error) => {
-            console.error('Error updating Body Part:', error);
-            this.snackBar.open('Failed to update Body Part.', 'Close', {
-              duration: 3000,
-            });
-          }
-        );
-    }
-  }
-
-  addOrUpdateCategory(): void {
-    if (this.newCategory.categoryId === 0) {
-      this.genericService.create('categories', this.newCategory).subscribe(
-        () => {
-          this.loadCategories();
-          this.resetForm();
-          this.snackBar.open('Category created successfully!', 'Close', {
-            duration: 1500,
-            verticalPosition: 'top',
-            horizontalPosition: 'center',
-            panelClass: ['success-snackbar'],
-          });
-        },
-        (error) => {
-          console.error('Error creating Category:', error);
-          this.snackBar.open('Failed to create Category.', 'Close', {
-            duration: 1500,
-            verticalPosition: 'top',
-            horizontalPosition: 'center',
-            panelClass: ['danger-snackbar'],
-          });
-        }
-      );
-    } else {
-      this.genericService
-        .updatebyid('categories', this.newCategory.categoryId, this.newCategory)
-        .subscribe(
-          () => {
-            this.loadCategories();
-            this.resetForm();
-            this.snackBar.open('Category updated successfully!', 'Close', {
+            this.loadTemplates();
+            this.resetTemplateForm();
+            this.snackBar.open('Template updated successfully!', 'Close', {
               duration: 1500,
               verticalPosition: 'top',
               horizontalPosition: 'center',
@@ -168,8 +150,8 @@ export class AdminComponent {
             });
           },
           (error) => {
-            console.error('Error updating Category:', error);
-            this.snackBar.open('Failed to update Category.', 'Close', {
+            console.error('Error updating template:', error);
+            this.snackBar.open('Failed to update template.', 'Close', {
               duration: 1500,
               verticalPosition: 'top',
               horizontalPosition: 'center',
@@ -180,36 +162,13 @@ export class AdminComponent {
     }
   }
 
-  addOrUpdateExercise(): void {
-    const formData = new FormData();
-    formData.append('exerciseId', this.newExercise.exerciseId.toString());
-    formData.append('exerciseName', this.newExercise.exerciseName);
-    formData.append('instructions', this.newExercise.instructions);
-    formData.append('bodyPartId', this.newExercise.bodyPartId.toString());
-    formData.append('categoryId', this.newExercise.categoryId.toString());
-  
-    // Validate if the file is selected and is a valid image type
-    if (this.fileName && this.newExercise.thumbnail.length > 0) {
-      const fileType = this.getFileType(this.fileName); // Get the file type based on file extension
-      if (fileType) {
-        formData.append(
-          'thumbnail',
-          new Blob([this.newExercise.thumbnail], { type: fileType }),
-          this.fileName
-        );
-      } else {
-        alert('Invalid file type. Only JPG, PNG, and GIF files are allowed.');
-        return;
-      }
-    }
-  
-    // Send the request to create or update
-    if (this.newExercise.exerciseId === 0) {
-      this.genericService.createWithFile('exercises', formData).subscribe(
+  // Delete a template
+  deleteTemplate(templateId: number): void {
+    if (confirm('Are you sure you want to delete this template?')) {
+      this.genericService.deleteById('templates', templateId).subscribe(
         () => {
-          this.loadExercises();
-          this.resetForm();
-          this.snackBar.open('Exercise created successfully!', 'Close', {
+          this.loadTemplates();
+          this.snackBar.open('Template deleted successfully!', 'Close', {
             duration: 1500,
             verticalPosition: 'top',
             horizontalPosition: 'center',
@@ -217,30 +176,8 @@ export class AdminComponent {
           });
         },
         (error) => {
-          console.error('Error creating Exercise:', error);
-          this.snackBar.open('Failed to create Exercise.', 'Close', {
-            duration: 1500,
-            verticalPosition: 'top',
-            horizontalPosition: 'center',
-            panelClass: ['danger-snackbar'],
-          });
-        }
-      );
-    } else {
-      this.genericService.createWithFile('exercises', formData).subscribe(
-        () => {
-          this.loadExercises();
-          this.resetForm();
-          this.snackBar.open('Exercise updated successfully!', 'Close', {
-            duration: 1500,
-            verticalPosition: 'top',
-            horizontalPosition: 'center',
-            panelClass: ['success-snackbar'],
-          });
-        },
-        (error) => {
-          console.error('Error updating Exercise:', error);
-          this.snackBar.open('Failed to update Exercise.', 'Close', {
+          console.error('Error deleting template:', error);
+          this.snackBar.open('Failed to delete template.', 'Close', {
             duration: 1500,
             verticalPosition: 'top',
             horizontalPosition: 'center',
@@ -250,164 +187,15 @@ export class AdminComponent {
       );
     }
   }
-  
-  // Delete methods
-  deleteBodyPart(id: number): void {
-    this.genericService.deletebyid('bodyparts', id).subscribe(
-      () => {
-        this.loadBodyParts();
-        this.snackBar.open('Body Part deleted successfully!', 'Close', {
-          duration: 1500,
-          verticalPosition: 'top',
-          horizontalPosition: 'center',
-          panelClass: ['success-snackbar'],
-        });
-      },
-      (error) => {
-        console.error('Error deleting Body Part:', error);
-        this.snackBar.open('Failed to delete Body Part.', 'Close', {
-          duration: 1500,
-          verticalPosition: 'top',
-          horizontalPosition: 'center',
-          panelClass: ['danger-snackbar'],
-        });
-      }
-    );
+
+  // Edit a template
+  editTemplate(template: Template): void {
+    this.newTemplate = { ...template };
+    this.openModal('template');
   }
 
-  deleteCategory(id: number): void {
-    this.genericService.deletebyid('categories', id).subscribe(
-      () => {
-        this.loadCategories();
-        this.snackBar.open('Category deleted successfully!', 'Close', {
-          duration: 1500,
-          verticalPosition: 'top',
-          horizontalPosition: 'center',
-          panelClass: ['success-snackbar'],
-        });
-      },
-      (error) => {
-        console.error('Error deleting Category:', error);
-        this.snackBar.open('Failed to delete Category.', 'Close', {
-          duration: 1500,
-          verticalPosition: 'top',
-          horizontalPosition: 'center',
-          panelClass: ['danger-snackbar'],
-        });
-      }
-    );
-  }
-
-  deleteExercise(id: number): void {
-    this.genericService.deletebyid('exercises', id).subscribe(
-      () => {
-        this.loadExercises();
-        this.snackBar.open('Exercise deleted successfully!', 'Close', {
-          duration: 1500,
-          verticalPosition: 'top',
-          horizontalPosition: 'center',
-          panelClass: ['success-snackbar'],
-        });
-      },
-      (error) => {
-        console.error('Error deleting Exercise:', error);
-        this.snackBar.open('Failed to delete Exercise.', 'Close', {
-          duration: 1500,
-          verticalPosition: 'top',
-          horizontalPosition: 'center',
-          panelClass: ['danger-snackbar'],
-        });
-      }
-    );
-  }
-
-  // Edit methods
-  editBodyPart(bodyPart: BodyPart): void {
-    this.newBodyPart = { ...bodyPart }; // Clone object to avoid reference issues
-    this.openModal();
-  }
-
-  editCategory(category: Category): void {
-    this.newCategory = { ...category };
-    this.openModal();
-  }
-
-  editExercise(exercise: Exercise): void {
-    this.newExercise = { ...exercise };
-    this.openModal();
-  }
-
-  // Reset form
-  resetForm(): void {
-    this.newBodyPart = { bodyPartId: 0, bodyPartName: '' };
-    this.newCategory = { categoryId: 0, categoryName: '', exercises: [] };
-    this.newExercise = {
-      exerciseId: 0,
-      exerciseName: '',
-      instructions: '',
-      bodyPartId: 0,
-      categoryId: 0,
-      workoutExercises: [],
-      thumbnail: new Uint8Array(),
-    };
-    this.imagePreview = null;
-  }
-
-  // Modal controls
-  openModal(): void {
-    this.isModalOpen = true;
-  }
-
-  closeModal(): void {
-    this.isModalOpen = false;
-    this.resetForm();
-  }
-
-  // Get display names for IDs
-  getBodyPartName(id: number): string {
-    const part = this.bodyParts.find((p) => p.bodyPartId === id);
-    return part ? part.bodyPartName : 'Unknown';
-  }
-
-  getCategoryName(id: number): string {
-    const category = this.categories.find((c) => c.categoryId === id);
-    return category ? category.categoryName : 'Unknown';
-  }
-
-  getFileType(fileName: string): string | null {
-    const extension = fileName.split('.').pop()?.toLowerCase();
-    switch (extension) {
-      case 'jpg':
-      case 'jpeg':
-        return 'image/jpeg';
-      case 'png':
-        return 'image/png';
-      case 'gif':
-        return 'image/gif';
-      default:
-        return null; // Invalid file type
-    }
-  }
-
-   // File change handler
-   onFileChange(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      const fileType = this.getFileType(file.name);
-      
-      if (!fileType) {
-        alert('Only JPG, PNG, and GIF files are allowed.');
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.imagePreview = e.target.result;
-        this.newExercise.thumbnail = new Uint8Array(e.target.result);
-      };
-      reader.readAsArrayBuffer(file);
-
-      this.fileName = file.name;
-    }
+  // Reset the template form
+  resetTemplateForm(): void {
+    this.newTemplate = { id: 0, name: '', description: '', workoutId: 0 };
   }
 }

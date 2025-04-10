@@ -6,10 +6,9 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { GenericService } from '../../../service/generic.service';
-import { RegisterModel } from '../../../models/registermodel';
 import { CommonModule } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { supabase } from '../../../service/supabase.service'; // Import Supabase client
 
 @Component({
   selector: 'app-register',
@@ -25,10 +24,8 @@ export class RegisterComponent {
 
   constructor(
     private fb: FormBuilder,
-    private genericService: GenericService<RegisterModel>,
     private router: Router,
     private snackBar: MatSnackBar
-
   ) {
     this.registerForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
@@ -41,42 +38,52 @@ export class RegisterComponent {
     this.showPassword = !this.showPassword; // Toggle password visibility
   }
 
-  onSubmit() {
+  async onSubmit() {
     if (this.registerForm.invalid) {
       return;
     }
 
-    const registerData: RegisterModel = {
-      username: this.registerForm.value.username,
-      email: this.registerForm.value.email,
-      password: this.registerForm.value.password,
-    };
+    const { username, email, password } = this.registerForm.value;
 
-    this.genericService.register(registerData).subscribe(
-      (response: any) => {
-        this.errorMessage = '';
-        // Show success snackbar
-        const snackBarRef = this.snackBar.open(
-          'Registered successfully!',
-          '',
-          {
-            duration: 1500,
-            verticalPosition: 'top',
-            horizontalPosition: 'center',
-            panelClass: ['success-snackbar'],
-          }
-        );
-        snackBarRef.afterDismissed().subscribe(() => {
-          this.router.navigate(['/login']).then(() => {
-            window.location.reload();
-          });
-        });    
-      },
-      (error: any) => {
-        this.errorMessage = 'An error occurred during registration.';
-        this.successMessage = '';
-        console.error('Registration failed:', error);
+    try {
+      // Call Supabase signUp method with user metadata
+      const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            displayName: username, // Store the username as displayName in user_metadata
+          },
+        },
+      });
+
+      if (error) {
+        throw error;
       }
-    );
+
+      this.errorMessage = '';
+      this.successMessage = 'Registered successfully!';
+
+      // Show success snackbar
+      const snackBarRef = this.snackBar.open(
+        'Registered successfully! Please check your email.',
+        '',
+        {
+          duration: 3000,
+          verticalPosition: 'top',
+          horizontalPosition: 'center',
+          panelClass: ['success-snackbar'],
+        }
+      );
+
+      snackBarRef.afterDismissed().subscribe(() => {
+        this.router.navigate(['/login']);
+      });
+    } catch (error: any) {
+      console.error('Registration failed:', error);
+      this.errorMessage =
+        error.message || 'An error occurred during registration.';
+      this.successMessage = '';
+    }
   }
 }
