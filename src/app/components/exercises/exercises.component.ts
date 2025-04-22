@@ -1,56 +1,65 @@
-import { Component } from '@angular/core';
-import { Exercise } from '../../models/exercise';
-import { GenericService } from '../../service/generic.service';
-import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { GenericService } from '../../service/generic.service';
+import { Exercise } from '../../models/exercise';
 import { BodyPart } from '../../models/bodypart';
 import { Category } from '../../models/category';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LoadingComponent } from '../loading/loading.component';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-exercises',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, LoadingComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './exercises.component.html',
-  styleUrl: './exercises.component.css',
+  styleUrls: ['./exercises.component.css'],
 })
-export class ExercisesComponent {
+export class ExercisesComponent implements OnInit {
   exercises: Exercise[] = [];
   bodyParts: BodyPart[] = [];
   categories: Category[] = [];
   isLoading: boolean = false;
   currentPage: number = 1;
   pageSize: number = 12;
-  
+
   constructor(
     private genericService: GenericService<any>,
     private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit(): void {
-    this.loadExercises();
     this.loadBodyParts();
     this.loadCategories();
+    this.loadExercises();
   }
 
-  // Fetch exercises from the API
   loadExercises(): void {
     this.isLoading = true;
-    this.genericService.getAll('exercises').subscribe(
-      (data) => {
-        this.exercises = data; // Store the exercises in the exercises array
+    this.genericService.getAll('exercise').subscribe({
+      next: (exercises) => {
+        // Process exercises
+        let processedExercises = exercises.map((exercise) => ({
+          ...exercise,
+          base64Thumbnail: exercise.thumbnail || './asset/dumbbell.png', // Fallback to default image if thumbnail is missing
+        }));
+
+        // Sort by a random seed value to maintain consistent random order
+        processedExercises.sort(() => Math.random() - 0.5);
+
+        this.exercises = processedExercises;
         this.isLoading = false;
       },
-      (error) => {
-        console.error('Error fetching exercises:', error);
+      error: (err) => {
+        console.error('Error loading exercises:', err);
         this.isLoading = false;
-      }
-    );
+      },
+    });
   }
 
   loadBodyParts(): void {
     this.isLoading = true;
-    this.genericService.getAll('bodyparts').subscribe(
+    this.genericService.getAll('bodypart').subscribe(
       (data) => {
         this.bodyParts = data;
         this.isLoading = false;
@@ -64,7 +73,7 @@ export class ExercisesComponent {
 
   loadCategories(): void {
     this.isLoading = true;
-    this.genericService.getAll('categories').subscribe(
+    this.genericService.getAll('category').subscribe(
       (data) => {
         this.categories = data;
         this.isLoading = false;
@@ -77,34 +86,30 @@ export class ExercisesComponent {
   }
 
   handleImageError(event: Event): void {
-    const imgElement = event.target as HTMLImageElement;
-    imgElement.src = 'assets/default-thumbnail.jpg'; // Fallback image
-    console.warn('Failed to load thumbnail, using default image');
+    const img = event.target as HTMLImageElement;
+    img.src = './assets/dumbbell.png';
   }
 
   getBodyPartName(id: number): string {
-    const part = this.bodyParts.find((p) => p.bodyPartId === id);
-    return part ? part.bodyPartName : 'Loading...';
+    const part = this.bodyParts.find((p) => p.id === id);
+    return part ? part.name : 'Unknown';
   }
 
   getCategoryName(id: number): string {
-    const category = this.categories.find((c) => c.categoryId === id);
-    return category ? category.categoryName : 'Loading...';
+    const category = this.categories.find((c) => c.id === id);
+    return category ? category.name : 'Unknown';
   }
-  
-  // Get exercises for the current page
+
   get paginatedExercises(): Exercise[] {
     const startIndex = (this.currentPage - 1) * this.pageSize;
     const endIndex = startIndex + this.pageSize;
     return this.exercises.slice(startIndex, endIndex);
   }
 
-  // Total number of pages
   get totalPages(): number {
     return Math.ceil(this.exercises.length / this.pageSize);
   }
 
-  // Change the current page
   changePage(page: number): void {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;

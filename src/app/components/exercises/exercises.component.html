@@ -1,35 +1,34 @@
+<!-- exercises.component.html -->
 <div class="exercises-container">
   <h2 class="title">Exercises</h2>
 
   <!-- Loading Spinner -->
   <div *ngIf="isLoading" class="loading-container">
-    <app-loading></app-loading>
+    <p>Loading...</p>
   </div>
 
   <!-- Exercises List -->
   <div *ngIf="!isLoading && exercises.length > 0" class="exercises-grid">
     <div *ngFor="let exercise of paginatedExercises" class="exercise-card">
-      <!-- Exercise Thumbnail -->
+      <!-- Exercise Thumbnail (lazy loaded) -->
       <div class="thumbnail">
-        <img
-          [src]="exercise.thumbnail || 'assets/default-thumbnail.jpg'"
-          [alt]="exercise.exerciseName"
-          (error)="handleImageError($event)"
-        />
+        <img [src]="exercise.thumbnail" alt="{{ exercise.name }} thumbnail" class="exercise-thumbnail"
+          (error)="handleImageError($event)" />
       </div>
 
       <!-- Exercise Details -->
       <div class="details">
-        <h3 class="exercise-name">{{ exercise.exerciseName }}</h3>
-        <p class="body-part">
-          <strong>Body Part:</strong> {{ getBodyPartName(exercise.bodyPartId) }}
-        </p>
-        <p class="category">
-          <strong>Category:</strong> {{ getCategoryName(exercise.categoryId) }}
-        </p>
-        <p class="instructions">
-          <strong>Instructions:</strong> {{ exercise.instructions || 'No instructions available.' }}
-        </p>
+        <h3 class="exercise-name">{{ exercise.name }}</h3>
+        <div class="meta-info">
+          <div class="meta-item">
+            <i class="bodypart-icon fa fa-dumbbell"></i> <!-- or whatever icon you prefer -->
+            <span class="meta-value">{{getBodyPartName(exercise.bodypart_id)}}</span>
+          </div>
+          <div class="meta-item">
+            <i class="category-icon fa fa-layer-group"></i> <!-- or whatever icon you prefer -->
+            <span class="meta-value">{{getCategoryName(exercise.category_id)}}</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -39,22 +38,10 @@
     <p>No exercises found.</p>
   </div>
 
-  <!-- Pagination -->
-  <div *ngIf="!isLoading && totalPages > 1" class="pagination">
-    <button
-      class="pagination-button"
-      [disabled]="currentPage === 1"
-      (click)="changePageAndScroll(currentPage - 1)"
-    >
-      Previous
-    </button>
-    <span class="page-info">Page {{ currentPage }} of {{ totalPages }}</span>
-    <button
-      class="pagination-button"
-      [disabled]="currentPage === totalPages"
-      (click)="changePageAndScroll(currentPage + 1)"
-    >
-      Next
-    </button>
+  <!-- Pagination Controls -->
+  <div class="pagination-controls" *ngIf="totalPages > 1">
+    <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1">Previous</button>
+    <span>Page {{ currentPage }} of {{ totalPages }}</span>
+    <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages">Next</button>
   </div>
 </div>

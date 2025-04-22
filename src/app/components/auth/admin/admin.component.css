@@ -227,14 +227,13 @@ tr:last-child td {
 }
 
 .form-control {
-  width: 100%;
+  width: 95%;
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--border);
   border-radius: 0.375rem;
   font-size: 0.875rem;
   margin-bottom: 1rem;
 }
-
 .form-control:focus {
   outline: none;
   border-color: var(--primary);

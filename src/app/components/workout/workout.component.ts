@@ -13,6 +13,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LoadingComponent } from '../loading/loading.component';
 import { WorkoutModalComponent } from '../workout-modal/workout-modal.component';
+import { WorkoutExercise } from '../../models/workoutexercise';
+import { Set } from '../../models/set';
 
 @Component({
   selector: 'app-workout',
@@ -35,10 +37,18 @@ export class WorkoutComponent implements OnInit {
   isWorkoutModalOpen = false;
   selectedTemplate: Template | null = null;
   selectedWorkout: Workout | null = null;
+  workoutExercises: any[] = [];
+  setsMap: { [exerciseIndex: number]: Set[] } = {};
 
   @Input() isOpen: boolean = false;
   @Output() close = new EventEmitter<void>();
   @Output() save = new EventEmitter<any>();
+
+  menuPositions: { [key: number]: { top: number; left: number } } = {};
+
+  isRenameModalOpen: boolean = false; // Tracks if the rename modal is open
+  renameTemplateName: string = ''; // Holds the new name for the template
+  templateToRename: Template | null = null; // Tracks the template being renamed
 
   constructor(private genericService: GenericService<any>) {}
 
@@ -48,7 +58,7 @@ export class WorkoutComponent implements OnInit {
 
   private loadTemplates(): void {
     this.isLoading = true;
-    this.genericService.getAll('templates').subscribe(
+    this.genericService.getAll('template').subscribe(
       (templates: Template[]) => {
         this.templates = templates;
         this.templates.forEach((template) => {
@@ -66,57 +76,114 @@ export class WorkoutComponent implements OnInit {
 
   loadWorkouts(templateId: number): void {
     this.genericService
-      .getAll(`workouts?templateId=eq.${templateId}`)
+      .getAll(`workout?template_id=eq.${templateId}`)
       .subscribe(
         (workouts: Workout[]) => {
-          this.workoutsMap[templateId] = workouts;
+          this.workoutsMap[templateId] = workouts || []; // Ensure it's an empty array if no workouts are returned
         },
         (error) => {
           console.error('Error loading workouts:', error);
+          this.workoutsMap[templateId] = []; // Initialize as an empty array if there's an error
         }
       );
   }
-  toggleMenu(templateId: number): void {
-    // Toggle the menu open state for the given template ID
+  toggleMenu(templateId: number, event: MouseEvent): void {
+    // Prevent the event from propagating
+    event.stopPropagation();
+
+    // Toggle the menu state
     this.menuOpenMap[templateId] = !this.menuOpenMap[templateId];
+
+    // Calculate and store the menu position if the menu is being opened
+    if (this.menuOpenMap[templateId]) {
+      const target = event.target as HTMLElement;
+      const rect = target.getBoundingClientRect();
+      this.menuPositions[templateId] = {
+        top: rect.bottom + window.scrollY, // Account for scrolling
+        left: rect.left + window.scrollX,
+      };
+    } else {
+      // Remove the position if the menu is being closed
+      delete this.menuPositions[templateId];
+    }
   }
+  private readonly TEMPLATE_PREFIX = 'template_';
+
   toggleCollapse(template: Template): void {
-    this.menuOpenMap[template.id] = !this.menuOpenMap[template.id];
+    const key = this.getTemplateKey(template.id);
+    this.menuOpenMap[key] = !this.menuOpenMap[key];
+
+    // Load workouts when expanding a template
+    if (this.menuOpenMap[key]) {
+      this.loadWorkouts(template.id);
+    }
   }
 
-  toggleWorkoutMenu(workoutId: number): void {
+  isTemplateExpanded(templateId: number): boolean {
+    return !!this.menuOpenMap[this.getTemplateKey(templateId)];
+  }
+
+  private getTemplateKey(templateId: number): number {
+    // Using a simple math operation to create a distinct key space
+    return templateId + 1000000; // This ensures we don't conflict with other IDs
+  }
+
+  toggleWorkoutMenu(workoutId: number, event: MouseEvent): void {
+    // Prevent the event from propagating
+    event.stopPropagation();
+
+    // Toggle the menu state
     this.menuOpenMap[workoutId] = !this.menuOpenMap[workoutId];
+
+    // Calculate and store the menu position if the menu is being opened
+    if (this.menuOpenMap[workoutId]) {
+      const target = event.target as HTMLElement;
+      const rect = target.getBoundingClientRect();
+      this.menuPositions[workoutId] = {
+        top: rect.bottom + window.scrollY, // Account for scrolling
+        left: rect.left + window.scrollX,
+      };
+    } else {
+      // Remove the position if the menu is being closed
+      delete this.menuPositions[workoutId];
+    }
   }
 
   renameWorkout(workout: Workout): void {
-    const newName = prompt('Enter new workout name:', workout.workoutName);
+    const newName = prompt('Enter new workout name:', workout.name);
     if (newName) {
-      workout.workoutName = newName;
-      this.genericService
-        .updateById('workouts', workout.workoutId, workout)
-        .subscribe(
-          () => console.log('Workout renamed successfully'),
-          (error) => console.error('Error renaming workout:', error)
-        );
+      workout.name = newName;
+      this.genericService.updateById('workout', workout.id, workout).subscribe(
+        () => console.log('Workout renamed successfully'),
+        (error) => console.error('Error renaming workout:', error)
+      );
     }
   }
 
   addWorkout(template: Template): void {
-    if (this.workoutsMap[template.id].length >= 10) {
+    if (this.workoutsMap[template.id]?.length >= 10) {
       alert('You can only add up to 10 workouts per template.');
       return;
     }
 
     this.selectedTemplate = template;
-    this.selectedWorkout = null; // New workout
+    this.selectedWorkout = {
+      id: 0, // Placeholder, will be set by the backend
+      template_id: template.id, // Set the correct template ID
+      name: '',
+      description: '',
+      created_at: new Date(), // Optional, remove if not required by the database schema
+      exercises: [], // Initialize with an empty array
+    };
+
     this.isWorkoutModalOpen = true;
   }
 
   deleteWorkout(template: Template, workoutId: number): void {
-    this.genericService.deleteById('workouts', workoutId).subscribe(
+    this.genericService.deleteById('workout', workoutId).subscribe(
       () => {
         this.workoutsMap[template.id] = this.workoutsMap[template.id].filter(
-          (w) => w.workoutId !== workoutId
+          (w) => w.id !== workoutId
         );
       },
       (error) => {
@@ -127,7 +194,15 @@ export class WorkoutComponent implements OnInit {
 
   openWorkoutModal(template: Template, workout?: Workout): void {
     this.selectedTemplate = template;
-    this.selectedWorkout = workout || null; // If editing, pass the workout; otherwise, create a new one
+    this.selectedWorkout = workout || {
+      id: 0,
+      template_id: template.id,
+      name: '',
+      description: '',
+      created_at: new Date(),
+      exercises: [],
+    };
+
     this.isWorkoutModalOpen = true;
   }
 
@@ -137,18 +212,22 @@ export class WorkoutComponent implements OnInit {
   }
 
   saveWorkout(newWorkout: Workout): void {
-    if (!this.selectedTemplate) return;
+    if (!this.selectedTemplate) {
+      console.error('No template selected.');
+      alert('Please select a template before saving a workout.');
+      return;
+    }
 
     if (this.selectedWorkout) {
       // Update existing workout
       this.genericService
-        .updateById('workouts', newWorkout.workoutId, newWorkout)
+        .updateById('workout', newWorkout.id, newWorkout)
         .subscribe(
           (updatedWorkout: Workout) => {
-            const workouts = this.workoutsMap[this.selectedTemplate!.id];
-            const index = workouts.findIndex(
-              (w) => w.workoutId === updatedWorkout.workoutId
-            );
+            const workouts = this.selectedTemplate
+              ? this.workoutsMap[this.selectedTemplate.id]
+              : [];
+            const index = workouts.findIndex((w) => w.id === updatedWorkout.id);
             if (index !== -1) {
               workouts[index] = updatedWorkout;
             }
@@ -161,10 +240,56 @@ export class WorkoutComponent implements OnInit {
         );
     } else {
       // Create new workout
-      this.genericService.create('workouts', newWorkout).subscribe(
+      this.genericService.create('workout', newWorkout).subscribe(
         (workout: Workout) => {
-          this.workoutsMap[this.selectedTemplate!.id].push(workout);
-          this.isWorkoutModalOpen = false;
+          if (this.selectedTemplate) {
+            this.workoutsMap[this.selectedTemplate.id].push(workout);
+          }
+
+          // Save workout exercises and sets
+          const workoutExercisesPayload = this.workoutExercises.map((item) => ({
+            workout_id: workout.id,
+            exercise_id: item.workoutExercise.exercise_id,
+          }));
+
+          this.genericService
+            .create('workoutexercise', workoutExercisesPayload)
+            .subscribe(
+              (createdWorkoutExercises: WorkoutExercise[]) => {
+                console.log(
+                  'Workout exercises created successfully:',
+                  createdWorkoutExercises
+                );
+
+                // Save sets
+                const setsPayload: Set[] = [];
+                createdWorkoutExercises.forEach(
+                  (createdWorkoutExercise, index) => {
+                    const sets =
+                      this.setsMap[index]?.map((set) => ({
+                        ...set,
+                        workoutexercise_id: createdWorkoutExercise.id,
+                      })) || [];
+                    setsPayload.push(...sets);
+                  }
+                );
+
+                this.genericService.create('set', setsPayload).subscribe(
+                  () => {
+                    console.log('Sets created successfully.');
+                    this.isWorkoutModalOpen = false;
+                  },
+                  (error) => {
+                    console.error('Error creating sets:', error);
+                    alert('Failed to add sets to workout exercises.');
+                  }
+                );
+              },
+              (error) => {
+                console.error('Error creating workout exercises:', error);
+                alert('Failed to add exercises to workout.');
+              }
+            );
         },
         (error) => {
           console.error('Error creating workout:', error);
@@ -180,40 +305,157 @@ export class WorkoutComponent implements OnInit {
       return;
     }
 
-    const newTemplate: Template = {
-      id: Date.now(),
+    const newTemplate: Omit<Template, 'id'> = {
       name: 'New Template',
       description: 'Template description',
-      workoutId: 0, // Default workoutId
+      workout_id: null, // Explicitly set to null
     };
 
     this.isLoading = true;
-    this.genericService.create('templates', newTemplate).subscribe(
+    this.genericService.create('template', newTemplate).subscribe(
       (template: Template) => {
-        this.templates.push(template);
-        this.workoutsMap[template.id] = [];
-        this.menuOpenMap[template.id] = false;
+        if (template && template.id) {
+          // Add the new template to the list
+          this.templates.push(template);
+
+          // Initialize workoutsMap and menuOpenMap for the new template
+          this.workoutsMap[template.id] = [];
+          this.menuOpenMap[template.id] = false;
+        } else {
+          console.warn(
+            'Template created but missing ID. Reloading templates...'
+          );
+          // Reload templates from the backend as a fallback
+          this.loadTemplates();
+        }
+
         this.isLoading = false;
       },
       (error) => {
         console.error('Error creating template:', error);
+        alert('Failed to create template. Please try again.');
         this.isLoading = false;
       }
     );
   }
 
-  renameTemplate(template: Template): void {
-    const newName = prompt('Enter new template name:', template.name);
-    if (newName) {
-      template.name = newName;
+  addWorkoutToTemplate(template: Template): void {
+    if (!template) {
+      console.error('Template is null or undefined.');
+      alert('Please select a valid template.');
+      return;
+    }
+
+    if (this.workoutsMap[template.id]?.length >= 10) {
+      alert('You can only add up to 10 workouts per template.');
+      return;
+    }
+
+    // Create a new workout object with default values
+    const newWorkout: Workout = {
+      id: 0, // Set to null since it will be generated by the backend
+      template_id: template.id, // Assign the template ID
+      name: '', // Empty name to be filled in the modal
+      description: '',
+      created_at: new Date(),
+      exercises: [], // Initialize with an empty array
+    };
+
+    // Set the selected template and workout, then open the modal
+    this.selectedTemplate = template;
+    this.selectedWorkout = newWorkout;
+    this.isWorkoutModalOpen = true;
+  }
+
+  addExerciseToWorkout(workout: Workout): void {
+    if (!workout) return;
+
+    if (workout.exercises && workout.exercises.length >= 10) {
+      alert('You can only add up to 10 exercises per workout.');
+      return;
+    }
+
+    const exerciseId = prompt('Enter exercise ID:');
+    if (!exerciseId) return;
+
+    const newWorkoutExercise: WorkoutExercise = {
+      id: Date.now(), // Temporary ID
+      workout_id: workout.id,
+      exercise_id: +exerciseId,
+    };
+
+    this.genericService.create('workoutexercise', newWorkoutExercise).subscribe(
+      (workoutExercise: WorkoutExercise) => {
+        if (!workout.exercises) workout.exercises = [];
+        workout.exercises.push(workoutExercise);
+
+        // Initialize sets for the new workout exercise
+        const exerciseIndex = workout.exercises.length - 1;
+        this.setsMap[exerciseIndex] = [
+          {
+            id: 0, // Placeholder
+            workoutexercise_id: workoutExercise.id,
+            reps: 10, // Default reps
+            weight: 20, // Default weight
+            weightUnit: 'kg', // Default weight unit
+          },
+        ];
+
+        console.log('Exercise added successfully:', workoutExercise);
+      },
+      (error) => {
+        console.error('Error adding exercise:', error);
+        alert('Failed to add exercise. Please try again.');
+      }
+    );
+  }
+
+  openRenameModal(template: Template): void {
+    this.templateToRename = template;
+    this.renameTemplateName = template.name; // Pre-fill the current name
+    this.isRenameModalOpen = true;
+  }
+
+  closeRenameModal(): void {
+    this.isRenameModalOpen = false;
+    this.renameTemplateName = '';
+    this.templateToRename = null;
+  }
+
+  saveRenameTemplate(): void {
+    if (this.templateToRename && this.renameTemplateName.trim()) {
+      const updatedTemplate = {
+        name: this.renameTemplateName.trim(), // Only include the fields you want to update
+        description: this.templateToRename.description, // Include other updatable fields if necessary
+      };
+
       this.genericService
-        .updateById('templates', template.id, template)
-        .subscribe();
+        .updateById('template', this.templateToRename.id, updatedTemplate)
+        .subscribe(
+          () => {
+            console.log('Template renamed successfully');
+            const templateToUpdate = this.templates.find(
+              (t) => t.id === this.templateToRename?.id
+            );
+            if (templateToUpdate) {
+              templateToUpdate.name = this.renameTemplateName.trim();
+            }
+            this.closeRenameModal(); // Close the modal after saving
+          },
+          (error) => {
+            console.error('Error renaming template:', error);
+            alert('Failed to rename template. Please try again.');
+          }
+        );
     }
   }
 
+  renameTemplate(template: Template): void {
+    this.openRenameModal(template); // Open the modal instead of using prompt
+  }
+
   deleteTemplate(templateId: number): void {
-    this.genericService.deleteById('templates', templateId).subscribe(
+    this.genericService.deleteById('template', templateId).subscribe(
       () => {
         this.templates = this.templates.filter((t) => t.id !== templateId);
         delete this.workoutsMap[templateId];
@@ -225,10 +467,19 @@ export class WorkoutComponent implements OnInit {
     );
   }
 
-  @HostListener('document:click', ['$event'])
-  closeAllMenus(event?: Event): void {
+  @HostListener('document:click')
+  closeAllMenus(): void {
     Object.keys(this.menuOpenMap).forEach((key) => {
-      this.menuOpenMap[+key] = false;
+      this.menuOpenMap[parseInt(key)] = false;
     });
+  }
+
+  private ensureTemplateSelected(): boolean {
+    if (!this.selectedTemplate) {
+      console.error('No template selected.');
+      alert('Please select a template first.');
+      return false;
+    }
+    return true;
   }
 }

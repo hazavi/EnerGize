@@ -1,11 +1,13 @@
+import { SafeUrl } from '@angular/platform-browser';
 import { WorkoutExercise } from './workoutexercise';
 
 export interface Exercise {
-  exerciseId: number;
-  exerciseName: string;
-  instructions: string;
-  bodyPartId: number;
-  categoryId: number;
+  id: number;
+  name: string;
+  instructions?: string;
+  bodypart_id: number;
+  category_id: number;
   workoutExercises: WorkoutExercise[];
-  thumbnail: Uint8Array;
+  thumbnail: string;
+  base64Thumbnail?: string;
 }

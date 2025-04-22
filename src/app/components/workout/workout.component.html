@@ -13,54 +13,82 @@
 
         <!-- Templates List -->
         <div class="templates-list">
+            <!-- Separate container for all menu dropdowns -->
+            <div class="global-dropdowns">
+                <!-- Template menu dropdowns -->
+                <div *ngFor="let template of templates">
+                    <div class="menu-dropdown absolute-dropdown" *ngIf="menuOpenMap[template.id]"
+                        [style.top.px]="menuPositions[template.id].top"
+                        [style.left.px]="menuPositions[template.id].left" (click)="$event.stopPropagation()">
+                        <button class="menu-item" (click)="renameTemplate(template)">
+                            <i class="fas fa-edit"></i> Rename
+                        </button>
+                        <button class="menu-item delete-item" (click)="deleteTemplate(template.id)">
+                            <i class="fas fa-trash-alt"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div *ngFor="let template of templates" class="template-card">
                 <!-- Template Header -->
                 <div class="template-header">
-                    <div class="template-title-container" (click)="toggleCollapse(template)">
+                    <div class="template-title-container" (click)="toggleCollapse(template); $event.stopPropagation()">
                         <i class="fas"
-                            [ngClass]="menuOpenMap[template.id] ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+                            [ngClass]="isTemplateExpanded(template.id) ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                         <h3 class="template-title">{{ template.name }}</h3>
                     </div>
 
-                    <!-- Template Menu -->
+                    <!-- Template Menu button only -->
                     <div class="menu-container">
                         <button class="btn btn-icon menu-toggle"
-                            (click)="toggleMenu(template.id); $event.stopPropagation()">
+                            (click)="toggleMenu(template.id, $event); $event.stopPropagation()">
                             <i class="fas fa-ellipsis-vertical"></i>
                         </button>
-                        <div class="menu-dropdown" *ngIf="menuOpenMap[template.id]">
-                            <button class="menu-item" (click)="renameTemplate(template)">
-                                <i class="fas fa-edit"></i> Rename
-                            </button>
-                            <button class="menu-item delete-item" (click)="deleteTemplate(template.id)">
-                                <i class="fas fa-trash-alt"></i> Delete
-                            </button>
-                        </div>
                     </div>
                 </div>
 
                 <!-- Workouts List -->
-                <div *ngIf="menuOpenMap[template.id]" class="workout-list">
+                <div *ngIf="isTemplateExpanded(template.id)" class="workout-list">
                     <div *ngFor="let workout of workoutsMap[template.id]" class="workout-card">
                         <div class="workout-info">
                             <i class="fas fa-dumbbell workout-icon"></i>
-                            <span class="workout-name">{{ workout.workoutName }}</span>
+                            <span class="workout-name">{{ workout?.name }}</span>
                         </div>
 
                         <!-- Workout Menu -->
                         <div class="menu-container">
                             <button class="btn btn-icon menu-toggle"
-                                (click)="toggleWorkoutMenu(workout.workoutId); $event.stopPropagation()">
+                                (click)="toggleWorkoutMenu(workout.id, $event); $event.stopPropagation()">
                                 <i class="fas fa-ellipsis-vertical"></i>
                             </button>
-                            <div class="menu-dropdown" *ngIf="menuOpenMap[workout.workoutId]">
+                            <div class="menu-dropdown" *ngIf="menuOpenMap[workout.id]"
+                                (click)="$event.stopPropagation()">
                                 <button class="menu-item" (click)="renameWorkout(workout)">
                                     <i class="fas fa-edit"></i> Rename
                                 </button>
-                                <button class="menu-item delete-item"
-                                    (click)="deleteWorkout(template, workout.workoutId)">
+                                <button class="menu-item delete-item" (click)="deleteWorkout(template, workout.id)">
                                     <i class="fas fa-trash-alt"></i> Delete
                                 </button>
+                                <button class="menu-item" (click)="addExerciseToWorkout(workout)">
+                                    <i class="fas fa-plus"></i> Add Exercise
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Exercises List -->
+                        <div class="exercise-list" *ngIf="workout?.exercises?.length">
+                            <div *ngFor="let exercise of workout?.exercises; let i = index" class="exercise-card">
+                                <span class="exercise-name">Exercise ID: {{ exercise?.id }}</span>
+
+                                <!-- Sets Section -->
+                                <div class="sets-list">
+                                    <div *ngFor="let set of setsMap[i]; let j = index" class="set-card">
+                                        <span class="set-info">
+                                            Set {{ j + 1 }}: {{ set.reps }} reps, {{ set.weight }} {{ set.weightUnit }}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -81,7 +109,32 @@
     </div>
 
     <!-- Workout Modal -->
-    <app-workout-modal *ngIf="isWorkoutModalOpen" [isOpen]="isWorkoutModalOpen" (close)="closeWorkoutModal()"
-        (save)="saveWorkout($event)">
-    </app-workout-modal>
+    <app-workout-modal [isOpen]="isWorkoutModalOpen" [selectedWorkout]="selectedWorkout"
+        [workoutExercises]="workoutExercises" (close)="closeWorkoutModal()"
+        (save)="saveWorkout($event)"></app-workout-modal>
+
+    <!-- Rename Template Modal -->
+    <div *ngIf="isRenameModalOpen" class="modal-overlay">
+        <div class="modal">
+
+            <!-- Modal Title -->
+            <h2>
+                <i class="fas fa-edit"></i> Rename Template
+            </h2>
+
+            <!-- Input Field -->
+            <input type="text" [(ngModel)]="renameTemplateName" placeholder="Enter new template name"
+                class="modal-input" />
+
+            <!-- Modal Actions -->
+            <div class="modal-actions">
+                <button class="btn btn-secondary" (click)="closeRenameModal()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn btn-primary" (click)="saveRenameTemplate()">
+                    <i class="fas fa-save"></i> Save
+                </button>
+            </div>
+        </div>
+    </div>
 </div>

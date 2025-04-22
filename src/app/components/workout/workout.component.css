@@ -1,12 +1,3 @@
-/* Global Styles */
-body {
-  background-color: #121212; /* Black background */
-  color: #fff;
-  font-family: "Arial", sans-serif;
-  margin: 0;
-  padding: 0;
-}
-
 /* Container Styles */
 .container {
   padding: 20px;
@@ -234,16 +225,34 @@ body {
   background-color: #3b4249;
 }
 
+/* Updated button-icon styling for proper centering */
 .btn-icon {
-  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
   background: transparent;
   color: #adb5bd;
   border-radius: 50%;
+  transition: background-color 0.2s ease;
 }
 
 .btn-icon:hover {
   background-color: rgba(255, 255, 255, 0.1);
   color: white;
+}
+
+/* Style specifically for the ellipsis menu button */
+.menu-toggle {
+  position: relative;
+}
+
+/* Make the icon centered in the button */
+.menu-toggle i {
+  margin: 0;
+  font-size: 14px;
 }
 
 /* Workout List */
@@ -263,7 +272,7 @@ body {
   background-color: #343a40;
   border-radius: 6px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  min-width: 150px;
+  min-width: 100px;
   z-index: 10;
   overflow: hidden;
 }
@@ -271,7 +280,7 @@ body {
 .menu-item {
   display: flex;
   align-items: center;
-  padding: 10px 14px;
+  padding: 10px 16px; /* Slightly increased padding */
   background: none;
   border: none;
   text-align: left;
@@ -279,6 +288,10 @@ body {
   color: #f8f9fa;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  white-space: nowrap; /* Prevent text wrapping */
+  box-sizing: border-box; /* Ensure padding is included in width */
+  overflow: hidden; /* Hide any content that exceeds the width */
+  text-overflow: ellipsis; /* Show ellipsis for overflowing text */
 }
 
 .menu-item i {
@@ -314,4 +327,177 @@ body {
   font-size: 48px;
   margin-bottom: 16px;
   color: #495057;
+}
+
+/* Global dropdowns container */
+.global-dropdowns {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  z-index: 10000;
+  pointer-events: none;
+}
+
+.absolute-dropdown {
+  position: fixed;
+  pointer-events: auto; /* Re-enable pointer events for the dropdown */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+  width: 150px; /* Set a fixed width */
+  background-color: #343a40;
+  border-radius: 6px;
+  overflow: hidden;
+  z-index: 10000;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(3px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Modal Container */
+.modal {
+  background-color: #212529;
+  border: 1px solid #343a40;
+  padding: 28px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  width: 380px;
+  max-width: 90%;
+  text-align: center;
+  color: #f8f9fa;
+  position: relative;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+
+/* Modal Title */
+.modal h2 {
+  margin: 0 0 24px 0;
+  font-size: 20px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  letter-spacing: 0.5px;
+}
+
+.modal h2 i {
+  color: #4c6ef5;
+  font-size: 20px;
+}
+
+/* Modal Input */
+.modal-input {
+  width: 90%;
+  padding: 14px;
+  margin-bottom: 24px;
+  border: 1px solid #454b52;
+  border-radius: 8px;
+  font-size: 15px;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #f8f9fa;
+  transition: all 0.2s ease;
+}
+
+.modal-input:focus {
+  outline: none;
+  border-color: #4c6ef5;
+  box-shadow: 0 0 0 2px rgba(76, 110, 245, 0.2);
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.modal-input::placeholder {
+  color: #6c757d;
+}
+
+/* Modal Actions */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Buttons */
+.modal-actions .btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  font-size: 15px;
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-actions .btn i {
+  font-size: 15px;
+}
+
+/* Primary Button */
+.modal-actions .btn-primary {
+  background-color: #4c6ef5;
+  color: white;
+}
+
+.modal-actions .btn-primary:hover {
+  background-color: #3b5bdb;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(76, 110, 245, 0.3);
+}
+
+.modal-actions .btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Secondary Button */
+.modal-actions .btn-secondary {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #e9ecef;
+}
+
+.modal-actions .btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.modal-actions .btn-secondary:active {
+  transform: translateY(0);
 }

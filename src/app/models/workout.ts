@@ -1,6 +1,10 @@
+import { WorkoutExercise } from './workoutexercise';
+
 export interface Workout {
-  workoutId: number;
-  workoutName: string;
+  id: number;
+  template_id: number;
+  name: string;
   description: string;
-  createdAt: Date;
+  created_at: Date;
+  exercises?: WorkoutExercise[];
 }

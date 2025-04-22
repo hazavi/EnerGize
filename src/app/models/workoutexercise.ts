@@ -1,7 +1,9 @@
 import { Set } from './set';
+
 export interface WorkoutExercise {
   id: number;
-  workoutId: number;
-  exerciseId: number;
-  sets: Set[];
+  workout_id: number;
+  exercise_id: number;
+  set_id?: number;
+  sets?: Set[];
 }

@@ -2,10 +2,15 @@ require("dotenv").config();
 const fs = require("fs");
 const path = require("path");
 
-// Read environment variables (ensure API_URL is set in Vercel)
-const apiUrl = process.env.API_URL;
-if (!apiUrl) {
-  throw new Error("API_URL environment variable is not set!");
+// Read environment variables
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
+
+if (!supabaseUrl) {
+  throw new Error("SUPABASE_URL environment variable is not set!");
+}
+if (!supabaseKey) {
+  throw new Error("SUPABASE_KEY environment variable is not set!");
 }
 
 const production = process.env.PRODUCTION === "true";
@@ -14,7 +19,8 @@ const production = process.env.PRODUCTION === "true";
 const envContent = `
 export const environment = {
   production: ${production},
-  apiUrl: '${apiUrl}'
+  supabaseUrl: '${supabaseUrl}',
+  supabaseKey: '${supabaseKey}'
 };
 `;
 

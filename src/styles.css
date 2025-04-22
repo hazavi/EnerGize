@@ -36,18 +36,9 @@ body {
   color: var(--text-clr);
 }
 
-html,
-body {
-  height: 100%;
-}
-body {
-  margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-}
-
 .success-snackbar {
-  background-color: #4caf50; /* Green background */
-  color: #fff; /* White text */
+  background-color: var(--success-color) !important;
+  color: #fff !important;
   text-align: center;
   font-size: 1em;
   font-weight: 400;
@@ -59,8 +50,8 @@ body {
 }
 
 .danger-snackbar {
-  background-color: #b80000;
-  color: #fff; /* White text */
+  background-color: var(--danger-color) !important; /* Red background */
+  color: #fff !important; /* White text */
   text-align: center;
   font-size: 1em;
   font-weight: 400;
@@ -72,7 +63,7 @@ body {
 }
 
 .mat-snack-bar-container {
-  padding: 16px 24px;
-  border-radius: 8px;
-  min-width: 250px;
+  padding: 16px 24px !important;
+  border-radius: 8px !important;
+  min-width: 250px !important;
 }

@@ -82,26 +82,11 @@ export class LoginComponent {
 
         this.errorMessage = '';
         this.successMessage = 'You have successfully logged in!';
-
-        // Show success snackbar
-        const snackBarRef = this.snackBar.open(
-          'You have successfully logged in!',
-          '',
-          {
-            duration: 1500,
-            verticalPosition: 'top',
-            horizontalPosition: 'center',
-            panelClass: ['success-snackbar'],
-          }
-        );
-
-        // Navigate to home after snackbar is dismissed
-        snackBarRef.afterDismissed().subscribe(() => {
-          this.isLoading = false; // Stop loading
-          this.router.navigate(['/home']).then(() => {
-            window.location.reload();
-          });
+        this.isLoading = false; // Stop loading
+        this.router.navigate(['/home']).then(() => {
+          window.location.reload();
         });
+
       }
     } catch (error: any) {
       this.isLoading = false; // Stop loading

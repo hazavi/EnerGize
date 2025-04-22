@@ -10,7 +10,7 @@
         <div class="modal-body">
             <div class="form-group">
                 <label for="workoutName">Workout Name</label>
-                <input type="text" id="workoutName" [(ngModel)]="workoutName" placeholder="Enter workout name"
+                <input type="text" id="workoutName" [(ngModel)]="name" placeholder="Enter workout name"
                     class="form-control" />
             </div>
 
@@ -34,18 +34,18 @@
                     <div class="exercise-header">
                         <div class="exercise-info">
                             <!-- Exercise Thumbnail -->
-                            <div class="exercise-thumbnail" *ngIf="item.exercise.thumbnail">
-                                <img [src]="'data:image/gif;base64,' + item.exercise.thumbnail" alt="Exercise thumbnail"
+                            <div class="exercise-thumbnail">
+                                <img [src]="getThumbnail(item.exercise.thumbnail)" alt="Exercise thumbnail"
                                     class="exercise-thumbnail" (error)="handleImageError($event)" />
-                            </div>
-                            <div class="placeholder" *ngIf="!item.exercise.thumbnail">
-                                <i class="fas fa-dumbbell"></i>
+                                <div class="placeholder" *ngIf="!item.exercise.thumbnail">
+                                    <i class="fas fa-dumbbell"></i>
+                                </div>
                             </div>
 
                             <div class="exercise-details">
-                                <h4 class="exercise-name">{{ item.exercise.exerciseName }}</h4>
-                                <span class="exercise-category" *ngIf="item.exercise.categoryId">
-                                    <i class="fas fa-tag"></i> Category ID: {{ item.exercise.categoryId }}
+                                <h4 class="exercise-name">{{ item.exercise.name }}</h4>
+                                <span class="exercise-category" *ngIf="item.exercise.category_id">
+                                    <i class="fas fa-tag"></i> Category ID: {{ item.exercise.category_id }}
                                 </span>
                             </div>
                         </div>
@@ -58,8 +58,7 @@
 
                     <!-- Sets Section -->
                     <div class="sets-container">
-                        <div *ngFor="let set of item.workoutExercise.sets; let j = index" class="set-row"
-                            [@fadeInAnimation]>
+                        <div *ngFor="let set of setsMap[i]; let j = index" class="set-row" [@fadeInAnimation]>
                             <div class="set-number">Set {{ j + 1 }}</div>
 
                             <div class="set-inputs">
@@ -94,8 +93,7 @@
             </div>
 
             <button class="btn btn-secondary" (click)="close.emit()">Cancel</button>
-            <button class="btn btn-success" (click)="saveWorkout()"
-                [disabled]="!workoutName || workoutExercises.length === 0">
+            <button class="btn btn-success" (click)="saveWorkout()" [disabled]="!name || workoutExercises.length === 0">
                 <i class="fas fa-save"></i> Save Workout
             </button>
         </div>
@@ -133,17 +131,17 @@
 
                     <!-- Exercise Thumbnail -->
                     <div class="exercise-thumbnail">
-                        <img *ngIf="exercise.thumbnail" [src]="'data:image/gif;base64,' + exercise.thumbnail"
-                            [alt]="exercise.exerciseName || 'Exercise Thumbnail'" (error)="handleImageError($event)" />
+                        <img *ngIf="exercise.thumbnail" [src]="getThumbnail(exercise.thumbnail)"
+                            [alt]="exercise.name || 'Exercise Thumbnail'" (error)="handleImageError($event)" />
                         <div class="placeholder" *ngIf="!exercise.thumbnail">
                             <i class="fas fa-dumbbell"></i>
                         </div>
                     </div>
 
                     <div class="exercise-info">
-                        <h4>{{ exercise.exerciseName }}</h4>
-                        <span class="category" *ngIf="exercise.categoryId">
-                            <i class="fas fa-tag"></i> Category ID: {{ exercise.categoryId }}
+                        <h4>{{ exercise.name }}</h4>
+                        <span class="category" *ngIf="exercise.category_id">
+                            <i class="fas fa-tag"></i> Category ID: {{ exercise.category_id }}
                         </span>
                     </div>
 

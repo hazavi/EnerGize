@@ -42,11 +42,10 @@ export class GenericService<T> {
     });
   }
 
-
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
-      apikey: environment.supabaseAnonKey,
-      Authorization: `Bearer ${environment.supabaseAnonKey}`,
+      apikey: environment.supabaseKey,
+      Authorization: `Bearer ${environment.supabaseKey}`,
     });
   }
 }
