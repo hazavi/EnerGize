@@ -16,6 +16,7 @@ import { WorkoutModalComponent } from '../workout-modal/workout-modal.component'
 import { WorkoutExercise } from '../../models/workoutexercise';
 import { Set } from '../../models/set';
 import { LoginResponse } from '../../models/loginresponse';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-workout',
@@ -52,7 +53,10 @@ export class WorkoutComponent implements OnInit {
   renameTemplateName: string = ''; // Holds the new name for the template
   templateToRename: Template | null = null; // Tracks the template being renamed
 
-  constructor(private genericService: GenericService<any>) {}
+  constructor(
+    private genericService: GenericService<any>,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     const user = localStorage.getItem('loginResponse');
@@ -245,7 +249,6 @@ export class WorkoutComponent implements OnInit {
       return;
     }
 
-
     if (this.selectedWorkout) {
       // Update existing workout
       this.genericService
@@ -292,6 +295,7 @@ export class WorkoutComponent implements OnInit {
     if (!this.user) {
       console.error('User is not logged in.');
       alert('Please log in to create a template.');
+      window.location.href = '/login';
       return;
     }
 
