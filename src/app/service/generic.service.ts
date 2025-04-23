@@ -24,10 +24,11 @@ export class GenericService<T> {
   }
 
   create(endpoint: string, data: T): Observable<T> {
-    const headers = this.getHeaders();
+    const headers = this.getHeaders()
+      .set('Content-Type', 'application/json')
+      .set('Prefer', 'return=representation'); // Ensure the server returns the created record
     return this.http.post<T>(`${this.baseUrl}/${endpoint}`, data, { headers });
   }
-
   updateById(endpoint: string, id: number, data: T): Observable<T> {
     const headers = this.getHeaders();
     return this.http.patch<T>(`${this.baseUrl}/${endpoint}?id=eq.${id}`, data, {

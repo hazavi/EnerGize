@@ -8,6 +8,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { Category } from '../../models/category';
+import { BodyPart } from '../../models/bodypart';
 
 @Component({
   selector: 'app-workout-modal',
@@ -36,6 +38,8 @@ export class WorkoutModalComponent {
 
   name: string = '';
   description: string = '';
+  categories: Category[] = [];
+  bodyParts: BodyPart[] = [];
 
   exercises: Exercise[] = [];
   selectedExercises: Exercise[] = [];
@@ -53,6 +57,8 @@ export class WorkoutModalComponent {
 
   ngOnInit(): void {
     this.loadExercises();
+    this.loadCategories();
+    this.loadBodyParts();
   }
 
   get filteredExercises(): Exercise[] {
@@ -83,7 +89,32 @@ export class WorkoutModalComponent {
       }
     );
   }
-
+  loadBodyParts(): void {
+    this.isLoading = true;
+    this.genericService.getAll('bodypart').subscribe(
+      (data) => {
+        this.bodyParts = data;
+        this.isLoading = false;
+      },
+      (error) => {
+        console.error('Error fetching body parts:', error);
+        this.isLoading = false;
+      }
+    );
+  }
+  loadCategories(): void {
+    this.isLoading = true;
+    this.genericService.getAll('category').subscribe(
+      (data) => {
+        this.categories = data;
+        this.isLoading = false;
+      },
+      (error) => {
+        console.error('Error fetching categories:', error);
+        this.isLoading = false;
+      }
+    );
+  }
   openExerciseModal(): void {
     this.isExerciseModalOpen = true;
   }
@@ -121,8 +152,6 @@ export class WorkoutModalComponent {
       if (!this.setsMap[index]) {
         this.setsMap[index] = [
           {
-            id: 0, // Placeholder
-            workoutexercise_id: 0, // Placeholder
             reps: 10, // Default reps
             weight: 20, // Default weight
             weightUnit: 'kg', // Default weight unit
@@ -146,8 +175,6 @@ export class WorkoutModalComponent {
     }
 
     this.setsMap[exerciseIndex].push({
-      id: 0, // Placeholder
-      workoutexercise_id: 0, // Placeholder
       reps: 10, // Default reps
       weight: 20, // Default weight
       weightUnit: 'kg', // Default weight unit
@@ -193,111 +220,53 @@ export class WorkoutModalComponent {
       return;
     }
 
-    if (!this.selectedWorkout) {
-      alert('No workout selected.');
-      return;
-    }
-
     this.isLoading = true;
 
-    // Step 1: Insert the workout into the database
     const workoutPayload = {
-      template_id: this.selectedWorkout.template_id,
+      template_id: this.selectedWorkout?.template_id,
       name: this.name,
       description: this.description || '',
-      created_at: new Date(),
+      created_at: new Date().toISOString(), // Ensure ISO 8601 format
     };
+
+    console.log(
+      'Creating workout with payload:',
+      JSON.stringify(workoutPayload, null, 2)
+    );
 
     this.genericService.create('workout', workoutPayload).subscribe(
       (createdWorkout) => {
         console.log('Workout created successfully:', createdWorkout);
 
-        // Step 2: Fetch the most recently created workout for the current template_id
-        this.genericService
-          .getAll(
-            `workout?template_id=eq.${
-              this.selectedWorkout?.template_id || ''
-            }&order=created_at.desc&limit=1`
-          )
-          .subscribe(
-            (workouts: Workout[]) => {
-              if (workouts.length === 0) {
-                console.error('Failed to fetch the created workout.');
-                alert('Failed to retrieve the workout ID.');
-                this.isLoading = false;
-                return;
-              }
-
-              const workoutId = workouts[0].id;
-              console.log('Fetched workout ID:', workoutId);
-
-              // Step 3: Insert workout exercises into the database
-              const workoutExercisesPayload = this.workoutExercises.map(
-                (item) => ({
-                  workout_id: workoutId,
-                  exercise_id: item.workoutExercise.exercise_id,
-                })
-              );
-
-              console.log(
-                'Workout Exercises Payload:',
-                JSON.stringify(workoutExercisesPayload, null, 2)
-              );
-
-              this.genericService
-                .create('workoutexercise', workoutExercisesPayload)
-                .subscribe(
-                  async (createdWorkoutExercises: WorkoutExercise[]) => {
-                    if (
-                      !createdWorkoutExercises ||
-                      createdWorkoutExercises.length === 0
-                    ) {
-                      console.error(
-                        'Workout exercises creation failed: Invalid response',
-                        createdWorkoutExercises
-                      );
-                      alert(
-                        'Failed to create workout exercises. Please check the console for more details.'
-                      );
-                      this.isLoading = false;
-                      return;
-                    }
-
-                    console.log(
-                      'Workout exercises created successfully:',
-                      createdWorkoutExercises
-                    );
-
-                    try {
-                      await this.createAllSets(createdWorkoutExercises);
-                      console.log('All sets created successfully.');
-                      this.isLoading = false;
-                      this.close.emit(); // Close the modal
-                    } catch (error) {
-                      console.error('Error creating sets:', error);
-                      alert(
-                        'Failed to create sets. Please check the console for more details.'
-                      );
-                      this.isLoading = false;
-                    }
-                  },
-                  (error) => {
-                    console.error('Error creating workout exercises:', error);
-                    alert(
-                      'Failed to add exercises to workout. Please check the console for more details.'
-                    );
-                    this.isLoading = false;
-                  }
-                );
-            },
-            (error) => {
-              console.error('Error fetching workout ID:', error);
-              alert(
-                'Failed to retrieve the workout ID. Please check the console for more details.'
-              );
-              this.isLoading = false;
-            }
+        if (!Array.isArray(createdWorkout) || createdWorkout.length === 0) {
+          console.error(
+            'Server returned invalid response for created workout.'
           );
+          alert(
+            'Failed to create workout. Please check the console for more details.'
+          );
+          this.isLoading = false;
+          return;
+        }
+
+        const workoutId = createdWorkout[0].id;
+
+        this.createWorkoutExercises(workoutId)
+          .then(() => {
+            console.log('All workout exercises created successfully.');
+            this.isLoading = false;
+            this.close.emit(); // Close the modal
+
+            // Reload the page after successful creation
+            window.location.reload();
+          })
+          .catch((error) => {
+            console.error('Error creating workout exercises:', error);
+            alert(
+              'Failed to add exercises to workout. Please check the console for more details.'
+            );
+            this.isLoading = false;
+          });
       },
       (error) => {
         console.error('Error creating workout:', error);
@@ -305,124 +274,55 @@ export class WorkoutModalComponent {
           'Failed to create workout. Please check the console for more details.'
         );
         this.isLoading = false;
-
-        // Debugging: Log the payload and error
-        console.error('Workout Payload:', JSON.stringify(workoutPayload));
       }
     );
   }
 
-  // Step 4: Insert sets into the database sequentially
-  createSetsForWorkoutExercise(
-    workoutExerciseId: number,
-    sets: Set[]
-  ): Promise<Set[]> {
-    return new Promise((resolve, reject) => {
-      const setsPayload = sets.map((set) => ({
-        ...set,
-        workoutexercise_id: workoutExerciseId, // Ensure the correct ID is used
-      }));
-
-      console.log(
-        `Creating sets for WorkoutExercise ID ${workoutExerciseId}:`,
-        setsPayload
-      );
-
-      this.genericService.create('set', setsPayload).subscribe(
-        (createdSets: Set[]) => {
-          if (!createdSets || createdSets.length === 0) {
-            console.error(
-              'Sets creation failed for WorkoutExercise ID:',
-              workoutExerciseId
-            );
-            reject(new Error('Failed to create sets.'));
-          } else {
-            console.log(
-              `Sets created successfully for WorkoutExercise ID ${workoutExerciseId}:`,
-              createdSets
-            );
-            resolve(createdSets);
-          }
-        },
-        (error) => {
-          console.error(
-            'Error creating sets for WorkoutExercise ID:',
-            workoutExerciseId,
-            error
-          );
-          reject(error);
-        }
-      );
-    });
-  }
-
-  async createAllSets(
-    createdWorkoutExercises: WorkoutExercise[]
-  ): Promise<void> {
-    for (let index = 0; index < createdWorkoutExercises.length; index++) {
-      const createdWorkoutExercise = createdWorkoutExercises[index];
+  private async createWorkoutExercises(workoutId: number): Promise<void> {
+    for (let index = 0; index < this.workoutExercises.length; index++) {
+      const item = this.workoutExercises[index];
       const sets = this.setsMap[index] || [];
 
-      if (sets.length === 0) {
-        console.warn(`No sets found for exercise index ${index}. Skipping.`);
-        continue;
-      }
+      // Ensure sets are properly serialized as a JSON array
+      const workoutExercisePayload = {
+        workout_id: workoutId,
+        exercise_id: item.workoutExercise.exercise_id,
+        sets: sets, // Send as JSON array (or use JSON.stringify if needed)
+      };
 
-      // Update workoutexercise_id in sets before creating them
-      const updatedSets = sets.map((set) => ({
-        ...set,
-        workoutexercise_id: createdWorkoutExercise.id, // Link to the correct WorkoutExercise ID
-      }));
+      console.log(
+        `Creating workout exercise for exercise ID ${item.workoutExercise.exercise_id}:`,
+        JSON.stringify(workoutExercisePayload, null, 2)
+      );
 
       try {
-        const createdSets = await this.createSetsForWorkoutExercise(
-          createdWorkoutExercise.id,
-          updatedSets
-        );
+        const createdWorkoutExercise = await this.genericService
+          .create('workoutexercise', workoutExercisePayload)
+          .toPromise();
 
-        // Update the set_id field in the workout exercise
-        if (createdSets && createdSets.length > 0) {
-          const setId = createdSets[0].id; // Assuming the first set ID is sufficient
-          await this.updateWorkoutExerciseSetId(
-            createdWorkoutExercise.id,
-            setId
-          );
-        }
+        console.log(
+          `Workout exercise created successfully for exercise ID ${item.workoutExercise.exercise_id}:`,
+          createdWorkoutExercise
+        );
       } catch (error) {
         console.error(
-          `Failed to create sets for WorkoutExercise ID ${createdWorkoutExercise.id}:`,
+          `Error creating workout exercise for exercise ID ${item.workoutExercise.exercise_id}:`,
           error
         );
-        throw error; // Stop further execution if any set creation fails
+        if (error instanceof Error && 'error' in error) {
+          console.error('Server response:', error.error);
+        }
+        throw error; // Stop further execution if any creation fails
       }
     }
   }
+  getCategoryName(id: number): string {
+    const category = this.categories.find((c) => c.id === id);
+    return category ? category.name : 'Unknown';
+  }
 
-  updateWorkoutExerciseSetId(
-    workoutExerciseId: number,
-    setId: number
-  ): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const payload = { set_id: setId };
-
-      this.genericService
-        .updateById('workoutexercise', workoutExerciseId, payload) // Use updateById instead of update
-        .subscribe(
-          () => {
-            console.log(
-              `Updated WorkoutExercise ID ${workoutExerciseId} with Set ID ${setId}`
-            );
-            resolve();
-          },
-          (error: any) => {
-            // Explicitly type the error parameter
-            console.error(
-              `Failed to update WorkoutExercise ID ${workoutExerciseId} with Set ID ${setId}:`,
-              error
-            );
-            reject(error);
-          }
-        );
-    });
+  getBodyPartName(id: number): string {
+    const part = this.bodyParts.find((p) => p.id === id);
+    return part ? part.name : 'Unknown';
   }
 }

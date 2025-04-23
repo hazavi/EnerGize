@@ -15,6 +15,7 @@ import { LoadingComponent } from '../loading/loading.component';
 import { WorkoutModalComponent } from '../workout-modal/workout-modal.component';
 import { WorkoutExercise } from '../../models/workoutexercise';
 import { Set } from '../../models/set';
+import { LoginResponse } from '../../models/loginresponse';
 
 @Component({
   selector: 'app-workout',
@@ -29,6 +30,7 @@ import { Set } from '../../models/set';
   styleUrls: ['./workout.component.css'],
 })
 export class WorkoutComponent implements OnInit {
+  user: LoginResponse | null = null;
   templates: Template[] = []; // List of templates
   workoutsMap: { [templateId: number]: Workout[] } = {}; // Map template ID to its workouts
   menuOpenMap: { [key: number]: boolean } = {}; // Map template/workout ID to its menu open state
@@ -53,25 +55,44 @@ export class WorkoutComponent implements OnInit {
   constructor(private genericService: GenericService<any>) {}
 
   ngOnInit(): void {
-    this.loadTemplates();
+    const user = localStorage.getItem('loginResponse');
+    if (user) {
+      this.user = JSON.parse(user) as LoginResponse; // Parse and store the login response
+    }
+
+    if (!this.user) {
+      console.error('User is not logged in.');
+      return;
+    }
+
+    this.loadTemplates(); // Load templates after ensuring the user is set
   }
 
   private loadTemplates(): void {
+    if (!this.user) {
+      console.error('User is not logged in.');
+      return;
+    }
+
     this.isLoading = true;
-    this.genericService.getAll('template').subscribe(
-      (templates: Template[]) => {
-        this.templates = templates;
-        this.templates.forEach((template) => {
-          this.workoutsMap[template.id] = []; // Initialize workouts for each template
-          this.menuOpenMap[template.id] = false; // Initialize menu state for each template
-        });
-        this.isLoading = false;
-      },
-      (error) => {
-        console.error('Error loading templates:', error);
-        this.isLoading = false;
-      }
-    );
+
+    // Filter templates by user_uid
+    this.genericService
+      .getAll(`template?user_uid=eq.${this.user.userId}`)
+      .subscribe(
+        (templates: Template[]) => {
+          this.templates = templates;
+          this.templates.forEach((template) => {
+            this.workoutsMap[template.id] = []; // Initialize workouts for each template
+            this.menuOpenMap[template.id] = false; // Initialize menu state for each template
+          });
+          this.isLoading = false;
+        },
+        (error) => {
+          console.error('Error loading templates:', error);
+          this.isLoading = false;
+        }
+      );
   }
 
   loadWorkouts(templateId: number): void {
@@ -218,6 +239,13 @@ export class WorkoutComponent implements OnInit {
       return;
     }
 
+    if (!this.user) {
+      console.error('User is not logged in.');
+      alert('Please log in to save a workout.');
+      return;
+    }
+
+
     if (this.selectedWorkout) {
       // Update existing workout
       this.genericService
@@ -245,51 +273,7 @@ export class WorkoutComponent implements OnInit {
           if (this.selectedTemplate) {
             this.workoutsMap[this.selectedTemplate.id].push(workout);
           }
-
-          // Save workout exercises and sets
-          const workoutExercisesPayload = this.workoutExercises.map((item) => ({
-            workout_id: workout.id,
-            exercise_id: item.workoutExercise.exercise_id,
-          }));
-
-          this.genericService
-            .create('workoutexercise', workoutExercisesPayload)
-            .subscribe(
-              (createdWorkoutExercises: WorkoutExercise[]) => {
-                console.log(
-                  'Workout exercises created successfully:',
-                  createdWorkoutExercises
-                );
-
-                // Save sets
-                const setsPayload: Set[] = [];
-                createdWorkoutExercises.forEach(
-                  (createdWorkoutExercise, index) => {
-                    const sets =
-                      this.setsMap[index]?.map((set) => ({
-                        ...set,
-                        workoutexercise_id: createdWorkoutExercise.id,
-                      })) || [];
-                    setsPayload.push(...sets);
-                  }
-                );
-
-                this.genericService.create('set', setsPayload).subscribe(
-                  () => {
-                    console.log('Sets created successfully.');
-                    this.isWorkoutModalOpen = false;
-                  },
-                  (error) => {
-                    console.error('Error creating sets:', error);
-                    alert('Failed to add sets to workout exercises.');
-                  }
-                );
-              },
-              (error) => {
-                console.error('Error creating workout exercises:', error);
-                alert('Failed to add exercises to workout.');
-              }
-            );
+          this.isWorkoutModalOpen = false;
         },
         (error) => {
           console.error('Error creating workout:', error);
@@ -305,10 +289,17 @@ export class WorkoutComponent implements OnInit {
       return;
     }
 
+    if (!this.user) {
+      console.error('User is not logged in.');
+      alert('Please log in to create a template.');
+      return;
+    }
+
     const newTemplate: Omit<Template, 'id'> = {
       name: 'New Template',
       description: 'Template description',
       workout_id: null, // Explicitly set to null
+      user_uid: this.user.userId, // Use the logged-in user's ID
     };
 
     this.isLoading = true;
@@ -393,8 +384,6 @@ export class WorkoutComponent implements OnInit {
         const exerciseIndex = workout.exercises.length - 1;
         this.setsMap[exerciseIndex] = [
           {
-            id: 0, // Placeholder
-            workoutexercise_id: workoutExercise.id,
             reps: 10, // Default reps
             weight: 20, // Default weight
             weightUnit: 'kg', // Default weight unit

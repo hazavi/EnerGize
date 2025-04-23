@@ -3,4 +3,5 @@ export interface Template {
   name: string;
   description: string;
   workout_id: number | null;
+  user_uid: string;
 }

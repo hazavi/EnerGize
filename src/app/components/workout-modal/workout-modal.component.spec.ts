@@ -107,8 +107,7 @@ describe('WorkoutModalComponent - confirmExerciseSelection', () => {
     expect(component.setsMap).toEqual({
       0: [
         {
-          id: 0,
-          workoutexercise_id: 0,
+
           reps: 10,
           weight: 20,
           weightUnit: 'kg',
@@ -116,8 +115,6 @@ describe('WorkoutModalComponent - confirmExerciseSelection', () => {
       ],
       1: [
         {
-          id: 0,
-          workoutexercise_id: 0,
           reps: 10,
           weight: 20,
           weightUnit: 'kg',

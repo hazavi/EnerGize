@@ -139,10 +139,20 @@
                     </div>
 
                     <div class="exercise-info">
-                        <h4>{{ exercise.name }}</h4>
-                        <span class="category" *ngIf="exercise.category_id">
-                            <i class="fas fa-tag"></i> Category ID: {{ exercise.category_id }}
-                        </span>
+                        <!-- Exercise Name -->
+                        <h4 class="exercise-name" title="{{ exercise.name }}">{{ exercise.name }}</h4>
+
+                        <!-- Body Part and Category on the Second Line -->
+                        <div class="exercise-meta">
+                            <span class="bodypart" *ngIf="exercise.bodypart_id"
+                                title="{{ getBodyPartName(exercise.bodypart_id) }}">
+                                <i class="fas fa-dumbbell"></i> {{ getBodyPartName(exercise.bodypart_id) }}
+                            </span>
+                            <span class="category" *ngIf="exercise.category_id"
+                                title="{{ getCategoryName(exercise.category_id) }}">
+                                <i class="fas fa-tag"></i> {{ getCategoryName(exercise.category_id) }}
+                            </span>
+                        </div>
                     </div>
 
                     <div class="selection-indicator">
