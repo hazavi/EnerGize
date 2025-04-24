@@ -5,52 +5,23 @@
     <!-- Main Content -->
     <div class="workout-content" *ngIf="!isLoading">
         <header class="workout-header">
-            <h2 class="section-title">Workout Planning</h2>
-            <button class="btn btn-primary add-template-btn" (click)="addTemplate()">
-                <i class="fas fa-plus-circle"></i> Add Template
-            </button>
+            <h2 class="section-title">Weekly Workout Plan</h2>
         </header>
 
-        <!-- Templates List -->
-        <div class="templates-list">
-            <!-- Separate container for all menu dropdowns -->
-            <div class="global-dropdowns">
-                <!-- Template menu dropdowns -->
-                <div *ngFor="let template of templates">
-                    <div class="menu-dropdown absolute-dropdown" *ngIf="menuOpenMap[template.id]"
-                        [style.top.px]="menuPositions[template.id].top"
-                        [style.left.px]="menuPositions[template.id].left" (click)="$event.stopPropagation()">
-                        <button class="menu-item" (click)="renameTemplate(template)">
-                            <i class="fas fa-edit"></i> Rename
-                        </button>
-                        <button class="menu-item delete-item" (click)="deleteTemplate(template.id)">
-                            <i class="fas fa-trash-alt"></i> Delete
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div *ngFor="let template of templates" class="template-card">
-                <!-- Template Header -->
-                <div class="template-header">
-                    <div class="template-title-container" (click)="toggleCollapse(template); $event.stopPropagation()">
-                        <i class="fas"
-                            [ngClass]="isTemplateExpanded(template.id) ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
-                        <h3 class="template-title">{{ template.name }}</h3>
-                    </div>
-
-                    <!-- Template Menu button only -->
-                    <div class="menu-container">
-                        <button class="btn btn-icon menu-toggle"
-                            (click)="toggleMenu(template.id, $event); $event.stopPropagation()">
-                            <i class="fas fa-ellipsis-vertical"></i>
-                        </button>
-                    </div>
+        <!-- Week Calendar View -->
+        <div class="week-calendar">
+            <!-- Day Cards for Each Day of the Week -->
+            <div *ngFor="let day of weekDays" class="day-card" (click)="openDayZoom(day)">
+                <!-- Day Header -->
+                <div class="day-header" [ngClass]="{'today': isToday(day)}">
+                    <h3 class="day-title">{{ day }}</h3>
+                    <span class="day-date" *ngIf="isToday(day)">Today</span>
                 </div>
 
-                <!-- Workouts List -->
-                <div *ngIf="isTemplateExpanded(template.id)" class="workout-list">
-                    <div *ngFor="let workout of workoutsMap[template.id]" class="workout-card">
+                <!-- Workouts List for this Day -->
+                <div class="workout-list">
+                    <div *ngFor="let workout of getWorkoutsForDay(day)" class="workout-card"
+                        (click)="$event.stopPropagation()">
                         <div class="workout-info">
                             <i class="fas fa-dumbbell workout-icon"></i>
                             <span class="workout-name">{{ workout?.name }}</span>
@@ -67,7 +38,8 @@
                                 <button class="menu-item" (click)="renameWorkout(workout)">
                                     <i class="fas fa-edit"></i> Rename
                                 </button>
-                                <button class="menu-item delete-item" (click)="deleteWorkout(template, workout.id)">
+                                <button class="menu-item delete-item"
+                                    (click)="deleteWorkout(getDayTemplate(day), workout.id)">
                                     <i class="fas fa-trash-alt"></i> Delete
                                 </button>
                                 <button class="menu-item" (click)="addExerciseToWorkout(workout)">
@@ -76,7 +48,7 @@
                             </div>
                         </div>
 
-                        <!-- Exercises List -->
+                        <!-- Exercises List (if available) -->
                         <div class="exercise-list" *ngIf="workout?.exercises?.length">
                             <div *ngFor="let exercise of workout?.exercises; let i = index" class="exercise-card">
                                 <span class="exercise-name">Exercise ID: {{ exercise?.id }}</span>
@@ -94,16 +66,67 @@
                     </div>
 
                     <!-- Add Workout Button -->
-                    <button class="btn btn-secondary add-workout-btn" (click)="addWorkout(template)">
+                    <button class="btn btn-add-workout"
+                        (click)="addWorkout(getDayTemplate(day)); $event.stopPropagation()">
                         <i class="fas fa-plus"></i> Add Workout
                     </button>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- Empty State Message -->
-            <div *ngIf="templates.length === 0" class="empty-state">
-                <i class="fas fa-clipboard-list empty-icon"></i>
-                <p>No workout templates yet. Create your first template to get started.</p>
+    <!-- Day Zoom Overlay -->
+    <div class="day-zoom-overlay" *ngIf="zoomedDay" (click)="closeDayZoom()">
+        <div class="day-zoom-container" (click)="$event.stopPropagation()">
+            <div class="day-zoom-header" [ngClass]="{'today': isToday(zoomedDay)}">
+                <h2>{{ zoomedDay }} Workouts</h2>
+                <button class="close-zoom-btn" (click)="closeDayZoom()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="day-zoom-content">
+                <!-- Workouts List for Zoomed Day -->
+                <div class="workout-list">
+                    <div *ngFor="let workout of getWorkoutsForDay(zoomedDay)" class="workout-card">
+                        <div class="workout-info">
+                            <i class="fas fa-dumbbell workout-icon"></i>
+                            <span class="workout-name">{{ workout?.name }}</span>
+                        </div>
+
+                        <!-- Workout Menu -->
+                        <div class="menu-container">
+                            <button class="btn btn-icon menu-toggle" (click)="toggleWorkoutMenu(workout.id, $event)">
+                                <i class="fas fa-ellipsis-vertical"></i>
+                            </button>
+                            <div class="menu-dropdown" *ngIf="menuOpenMap[workout.id]"
+                                (click)="$event.stopPropagation()">
+                                <button class="menu-item" (click)="renameWorkout(workout)">
+                                    <i class="fas fa-edit"></i> Rename
+                                </button>
+                                <button class="menu-item delete-item"
+                                    (click)="deleteWorkout(getDayTemplate(zoomedDay), workout.id)">
+                                    <i class="fas fa-trash-alt"></i> Delete
+                                </button>
+                                <button class="menu-item" (click)="addExerciseToWorkout(workout)">
+                                    <i class="fas fa-plus"></i> Add Exercise
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Exercises List -->
+                        <div class="exercise-list" *ngIf="workout?.exercises?.length">
+                            <div *ngFor="let exercise of workout?.exercises; let i = index" class="exercise-card">
+                                <span class="exercise-name">{{ exercise?.exercise_id !== undefined ? getExerciseName(exercise.exercise_id) : 'Unknown Exercise' }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add Workout Button -->
+                    <button class="btn btn-add-workout"
+                        (click)="addWorkout(getDayTemplate(zoomedDay)); $event.stopPropagation()">
+                        <i class="fas fa-plus"></i> Add Workout
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -112,29 +135,4 @@
     <app-workout-modal [isOpen]="isWorkoutModalOpen" [selectedWorkout]="selectedWorkout"
         [workoutExercises]="workoutExercises" (close)="closeWorkoutModal()"
         (save)="saveWorkout($event)"></app-workout-modal>
-
-    <!-- Rename Template Modal -->
-    <div *ngIf="isRenameModalOpen" class="modal-overlay">
-        <div class="modal">
-
-            <!-- Modal Title -->
-            <h2>
-                <i class="fas fa-edit"></i> Rename Template
-            </h2>
-
-            <!-- Input Field -->
-            <input type="text" [(ngModel)]="renameTemplateName" placeholder="Enter new template name"
-                class="modal-input" />
-
-            <!-- Modal Actions -->
-            <div class="modal-actions">
-                <button class="btn btn-secondary" (click)="closeRenameModal()">
-                    <i class="fas fa-times"></i> Cancel
-                </button>
-                <button class="btn btn-primary" (click)="saveRenameTemplate()">
-                    <i class="fas fa-save"></i> Save
-                </button>
-            </div>
-        </div>
-    </div>
 </div>

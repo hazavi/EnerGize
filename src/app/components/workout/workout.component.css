@@ -106,11 +106,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
+  padding: 14px 40px 14px 14px; /* Add right padding to make room for the menu */
   margin-bottom: 12px;
   background-color: #343a40;
   border-radius: 6px;
   transition: all 0.2s ease;
+  border-left: 3px solid #4c6ef5;
 }
 
 .workout-card:hover {
@@ -121,7 +122,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
 }
 
 .workout-info {
@@ -173,12 +174,451 @@
   background-color: #0056b3;
 }
 
-/* Main Container */
+/* Main container styles */
 .workout-container {
-  max-width: 1000px;
+  width: 100%;
+  max-width: 1800px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 32px 24px;
+  min-height: calc(100vh - 80px);
+  background-color: #121416;
   color: #ffffff;
+}
+
+.workout-content {
+  height: 100%;
+}
+
+/* Section Header */
+.workout-header {
+  margin-bottom: 40px;
+  padding-left: 8px;
+}
+
+.section-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0;
+  color: #ffffff;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 10px;
+}
+
+.section-title:after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 80px;
+  height: 4px;
+  background-color: #4c6ef5;
+  border-radius: 2px;
+}
+
+/* Week Calendar Layout - Full Width Grid */
+.week-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 16px;
+  width: 100%;
+}
+
+/* Day Card Styling */
+.day-card {
+  background-color: #1e2126;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  height: 480px;
+  border: 1px solid #2a2e36;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.day-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  border-color: #3a3f48;
+}
+
+/* Day Header - Enhanced */
+.day-header {
+  padding: 16px 8px;
+  background-color: #21252b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+}
+
+.day-header.today {
+  background-color: #4c6ef5;
+  position: relative;
+}
+
+.day-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-align: center;
+  color: white;
+}
+
+.day-date {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 6px;
+  font-weight: 500;
+  background-color: rgba(0, 0, 0, 0.25);
+  padding: 3px 10px;
+  border-radius: 12px;
+}
+
+/* Workout List - Improved spacing */
+.workout-list {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-grow: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #444 #222;
+}
+
+.workout-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.workout-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.workout-list::-webkit-scrollbar-thumb {
+  background-color: #444;
+  border-radius: 6px;
+}
+
+/* Workout Cards - Cleaner design */
+.workout-card {
+  background-color: #272b33;
+  border-radius: 8px;
+  padding: 14px 40px 14px 14px; /* Space for the menu */
+  position: relative;
+  transition: all 0.2s ease;
+  border-left: 3px solid #4c6ef5;
+}
+
+.workout-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  background-color: #2d323c;
+}
+
+.workout-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.workout-icon {
+  color: #4c6ef5;
+  font-size: 16px;
+}
+
+.workout-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+/* Add Workout Button - More attractive */
+.btn-add-workout {
+  margin-top: auto; /* Push to bottom */
+  background-color: rgba(76, 110, 245, 0.08);
+  color: #b0b8e3;
+  border: dashed 1px rgba(76, 110, 245, 0.3);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.btn-add-workout:hover {
+  background-color: rgba(76, 110, 245, 0.12);
+  color: #ffffff;
+  border-color: rgba(76, 110, 245, 0.5);
+}
+
+.btn-add-workout i {
+  font-size: 14px;
+}
+
+/* Menu Container - Perfect centering */
+.menu-container {
+  position: absolute;
+  top: 0;
+  right: 6px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-toggle {
+  background-color: transparent;
+  color: #adb5bd;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+}
+
+.menu-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.menu-toggle i {
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* Dropdown menu improvements */
+.menu-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #2d3238;
+  border-radius: 6px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  min-width: 160px;
+  z-index: 1000;
+  overflow: hidden;
+  border: 1px solid #3a3f48;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  width: 100%;
+  color: #f8f9fa;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-size: 14px;
+}
+
+.menu-item i {
+  width: 18px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.menu-item:hover {
+  background-color: #3a3f48;
+}
+
+.delete-item {
+  color: #ff6b6b;
+}
+
+.delete-item:hover {
+  background-color: rgba(255, 107, 107, 0.15);
+}
+
+/* Exercise List styling */
+.exercise-list {
+  margin-top: 12px;
+  padding-left: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.exercise-card {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.exercise-name {
+  font-size: 14px;
+  color: #e9ecef;
+}
+
+/* Day zoom overlay - enhanced for better UX */
+.day-zoom-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+  overflow: hidden;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.day-zoom-container {
+  width: 90%;
+  max-width: 800px;
+  height: 90%;
+  max-height: 800px;
+  background-color: #1e2126;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  animation: zoomIn 0.3s ease;
+  border: 1px solid #3a3f48;
+}
+
+@keyframes zoomIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.day-zoom-header {
+  background-color: #21252b;
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.day-zoom-header.today {
+  background-color: #4c6ef5;
+}
+
+.day-zoom-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: white;
+  letter-spacing: 0.5px;
+}
+
+.close-zoom-btn {
+  background: none;
+  border: none;
+  color: #adb5bd;
+  font-size: 20px;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.close-zoom-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.day-zoom-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #444 #222;
+}
+
+.day-zoom-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.day-zoom-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.day-zoom-content::-webkit-scrollbar-thumb {
+  background-color: #444;
+  border-radius: 6px;
+}
+
+/* Responsive adjustments - preserve 7 columns for as long as possible */
+@media (min-width: 1200px) {
+  .week-calendar {
+    grid-template-columns: repeat(7, 1fr);
+  }
+}
+
+@media (max-width: 1199px) and (min-width: 992px) {
+  .week-calendar {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 991px) and (min-width: 768px) {
+  .week-calendar {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 767px) and (min-width: 576px) {
+  .week-calendar {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 575px) {
+  .week-calendar {
+    grid-template-columns: 1fr;
+  }
+
+  .workout-container {
+    padding: 16px 12px;
+  }
+
+  .section-title {
+    font-size: 28px;
+  }
 }
 
 /* Section Header */
@@ -187,6 +627,328 @@
   font-weight: 600;
   margin: 0;
   color: #ffffff;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 8px;
+}
+
+.section-title:after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background-color: #4c6ef5;
+  border-radius: 2px;
+}
+
+/* Week Calendar Layout */
+.week-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 12px; /* Reduced gap to fit more content */
+  width: 100%;
+}
+
+/* Day Card Styling */
+.day-card {
+  background-color: #2a2a2a;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  min-height: 500px; /* Increased height */
+  border: 1px solid #3a3a3a;
+  transition: all 0.3s ease; /* Added for smooth zoom transition */
+  cursor: pointer;
+}
+
+.day-card:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Day Header */
+.day-header {
+  padding: 16px;
+  background-color: #343a40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.day-header.today {
+  background-color: #4c6ef5;
+  position: relative;
+}
+
+.day-header:after {
+  content: "\f065"; /* Font Awesome expand icon */
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.day-card:hover .day-header:after {
+  opacity: 1;
+}
+
+.day-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  color: white;
+}
+
+.day-date {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 4px;
+  font-weight: 500;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* Workout List */
+.workout-list {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-grow: 1;
+}
+
+/* Workout Card */
+.workout-card {
+  background-color: #343a40;
+  border-radius: 8px;
+  padding: 14px 40px 14px 14px; /* Add right padding to make room for the menu */
+  position: relative;
+  transition: all 0.2s ease;
+  border-left: 3px solid #4c6ef5;
+}
+
+.workout-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.workout-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.workout-icon {
+  color: #4c6ef5;
+  font-size: 16px;
+}
+
+.workout-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+/* Add Workout Button */
+.btn-add-workout {
+  margin-top: auto; /* Push to bottom */
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #adb5bd;
+  border: dashed 1px rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-add-workout:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.btn-add-workout i {
+  font-size: 14px;
+}
+
+/* Menu Container - Updated positioning for proper alignment */
+.menu-container {
+  position: absolute;
+  top: 50%; /* Position at 50% from the top of the parent */
+  transform: translateY(
+    -50%
+  ); /* Shift up by 50% of its own height to center vertically */
+  right: 10px;
+  height: 28px; /* Fixed height */
+  width: 28px; /* Fixed width */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-toggle {
+  background-color: transparent;
+  color: #adb5bd;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0; /* Remove any padding */
+  border: none;
+  cursor: pointer;
+}
+
+.menu-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+/* Updated dropdown positioning */
+.menu-dropdown {
+  position: absolute;
+  top: 28px; /* Position right below the button */
+  right: 0;
+  background-color: #343a40;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 150px;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  width: 100%;
+  color: #f8f9fa;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.menu-item i {
+  width: 16px;
+  text-align: center;
+}
+
+.menu-item:hover {
+  background-color: #495057;
+}
+
+.delete-item {
+  color: #ff6b6b;
+}
+
+.delete-item:hover {
+  background-color: rgba(255, 0, 0, 0.15);
+}
+
+/* Exercise List */
+.exercise-list {
+  margin-top: 12px;
+  padding-left: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.exercise-card {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.exercise-name {
+  font-size: 14px;
+  color: #e9ecef;
+}
+
+/* Sets List */
+.sets-list {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.set-card {
+  background-color: rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
+  padding: 6px 10px;
+}
+
+.set-info {
+  font-size: 12px;
+  color: #adb5bd;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1600px) {
+  .week-calendar {
+    grid-template-columns: repeat(7, 1fr);
+  }
+}
+
+@media (max-width: 1400px) {
+  .week-calendar {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 1200px) {
+  .week-calendar {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .week-calendar {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .week-calendar {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .week-calendar {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .week-calendar {
+    grid-template-columns: 1fr;
+  }
+
+  .workout-container {
+    padding: 16px;
+  }
 }
 
 /* Buttons */
@@ -402,7 +1164,6 @@
   }
 }
 
-
 /* Modal Title */
 .modal h2 {
   margin: 0 0 24px 0;
@@ -500,4 +1261,87 @@
 
 .modal-actions .btn-secondary:active {
   transform: translateY(0);
+}
+
+/* Day zoom overlay styles */
+.day-zoom-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.day-zoom-container {
+  width: 90%;
+  max-width: 800px;
+  height: 90%;
+  max-height: 800px;
+  background-color: #2a2a2a;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  animation: zoomIn 0.3s ease;
+}
+
+@keyframes zoomIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.day-zoom-header {
+  background-color: #343a40;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.day-zoom-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: white;
+}
+
+.close-zoom-btn {
+  background: none;
+  border: none;
+  color: #adb5bd;
+  font-size: 20px;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.close-zoom-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.day-zoom-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
 }
