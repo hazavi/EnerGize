@@ -174,7 +174,7 @@
   background-color: #0056b3;
 }
 
-/* Core container styles */
+/* Core layout */
 .workout-container {
   width: 100%;
   max-width: 1800px;
@@ -184,12 +184,9 @@
   background-color: #121416;
   color: #fff;
 }
-
 .workout-content {
   height: 100%;
 }
-
-/* Section Header */
 .section-title {
   font-size: 1.75rem;
   font-weight: 700;
@@ -199,7 +196,6 @@
   display: inline-block;
   padding-bottom: 0.6rem;
 }
-
 .section-title:after {
   content: "";
   position: absolute;
@@ -211,15 +207,13 @@
   border-radius: 2px;
 }
 
-/* Week Calendar Layout */
+/* Calendar */
 .week-calendar {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 1rem;
   width: 100%;
 }
-
-/* Day Card */
 .day-card {
   background-color: #1e2126;
   border-radius: 0.75rem;
@@ -230,9 +224,8 @@
   height: 30rem;
   border: 1px solid #2a2e36;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
 }
-
 .day-card:hover {
   transform: translateY(-0.25rem);
   box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.3);
@@ -248,20 +241,17 @@
   align-items: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
-
 .day-header.today {
   background-color: #4c6ef5;
 }
-
 .day-title {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
   letter-spacing: 0.5px;
   text-align: center;
-  color: white;
+  color: #fff;
 }
-
 .day-date {
   font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.9);
@@ -283,15 +273,12 @@
   scrollbar-width: thin;
   scrollbar-color: #444 #222;
 }
-
 .workout-list::-webkit-scrollbar {
   width: 6px;
 }
-
 .workout-list::-webkit-scrollbar-track {
   background: transparent;
 }
-
 .workout-list::-webkit-scrollbar-thumb {
   background-color: #444;
   border-radius: 6px;
@@ -303,34 +290,30 @@
   border-radius: 0.5rem;
   padding: 0.85rem 2.5rem 0.85rem 0.85rem;
   position: relative;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
   border-left: 3px solid #4c6ef5;
 }
-
 .workout-card:hover {
   transform: translateY(-0.15rem);
   box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.25);
   background-color: #2d323c;
 }
-
 .workout-info {
   display: flex;
   align-items: center;
   gap: 0.6rem;
 }
-
 .workout-icon {
   color: #4c6ef5;
   font-size: 1rem;
 }
-
 .workout-name {
   font-size: 0.95rem;
   font-weight: 500;
   color: #fff;
 }
 
-/* Add Workout Button */
+/* Add Button */
 .btn-add-workout {
   margin-top: auto;
   background-color: rgba(76, 110, 245, 0.08);
@@ -344,16 +327,15 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
   font-weight: 500;
 }
-
 .btn-add-workout:hover {
   background-color: rgba(76, 110, 245, 0.12);
   color: #fff;
 }
 
-/* Menu Container */
+/* Menu */
 .menu-container {
   position: absolute;
   top: 0;
@@ -362,9 +344,8 @@
   display: flex;
   align-items: center;
 }
-
 .menu-toggle {
-  background: none;
+  background: 0 0;
   color: #adb5bd;
   width: 1.75rem;
   height: 1.75rem;
@@ -376,13 +357,10 @@
   border: none;
   cursor: pointer;
 }
-
 .menu-toggle:hover {
   background-color: rgba(255, 255, 255, 0.1);
   color: #fff;
 }
-
-/* Dropdown menu */
 .menu-dropdown {
   position: absolute;
   top: 100%;
@@ -394,30 +372,26 @@
   z-index: 1000;
   border: 1px solid #3a3f48;
 }
-
 .menu-item {
   display: flex;
   align-items: center;
   gap: 0.6rem;
   padding: 0.75rem 1rem;
-  background: none;
+  background: 0 0;
   border: none;
   text-align: left;
   width: 100%;
   color: #f8f9fa;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s;
   font-size: 0.9rem;
 }
-
 .menu-item:hover {
   background-color: #3a3f48;
 }
-
 .delete-item {
   color: #ff6b6b;
 }
-
 .delete-item:hover {
   background-color: rgba(255, 107, 107, 0.15);
 }
@@ -430,38 +404,34 @@
   flex-direction: column;
   gap: 0.5rem;
 }
-
 .exercise-card {
   background-color: rgba(255, 255, 255, 0.05);
   border-radius: 0.4rem;
   padding: 0.6rem 0.75rem;
 }
-
 .exercise-name {
   font-size: 0.9rem;
   color: #e9ecef;
 }
 
-/* Sets List */
+/* Sets */
 .sets-list {
   margin-top: 0.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
 }
-
 .set-card {
   background-color: rgba(255, 255, 255, 0.03);
   border-radius: 0.25rem;
   padding: 0.4rem 0.6rem;
 }
-
 .set-info {
   font-size: 0.75rem;
   color: #adb5bd;
 }
 
-/* Day zoom overlay */
+/* Day Zoom */
 .day-zoom-overlay {
   position: fixed;
   top: 0;
@@ -474,9 +444,8 @@
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  animation: fadeIn 0.2s ease;
+  animation: fadeIn 0.2s;
 }
-
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -485,7 +454,6 @@
     opacity: 1;
   }
 }
-
 .day-zoom-container {
   width: 90%;
   max-width: 800px;
@@ -497,10 +465,9 @@
   display: flex;
   flex-direction: column;
   box-shadow: 0 0.6rem 2.5rem rgba(0, 0, 0, 0.5);
-  animation: zoomIn 0.3s ease;
+  animation: zoomIn 0.3s;
   border: 1px solid #3a3f48;
 }
-
 @keyframes zoomIn {
   from {
     transform: scale(0.95);
@@ -511,7 +478,6 @@
     opacity: 1;
   }
 }
-
 .day-zoom-header {
   background-color: #21252b;
   padding: 1.25rem 1.5rem;
@@ -520,20 +486,17 @@
   align-items: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
-
 .day-zoom-header.today {
   background-color: #4c6ef5;
 }
-
 .day-zoom-header h2 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
-  color: white;
+  color: #fff;
 }
-
 .close-zoom-btn {
-  background: none;
+  background: 0 0;
   border: none;
   color: #adb5bd;
   font-size: 1.25rem;
@@ -545,12 +508,10 @@
   align-items: center;
   justify-content: center;
 }
-
 .close-zoom-btn:hover {
   background-color: rgba(255, 255, 255, 0.1);
-  color: white;
+  color: #fff;
 }
-
 .day-zoom-content {
   flex: 1;
   padding: 1.25rem;
