@@ -24,6 +24,7 @@
     "dotenv": "^16.4.7",
     "ngx-pagination": "^6.0.3",
     "rxjs": "^7.8.2",
+    "sortablejs": "^1.15.6",
     "tslib": "^2.3.0",
     "zone.js": "^0.15.0"
   },
@@ -32,6 +33,7 @@
     "@angular/cli": "^19.2.3",
     "@angular/compiler-cli": "^19.2.2",
     "@types/jasmine": "~5.1.0",
+    "@types/sortablejs": "^1.15.8",
     "cross-env": "^7.0.3",
     "jasmine-core": "~5.5.0",
     "karma": "~6.4.0",

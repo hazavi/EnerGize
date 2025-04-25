@@ -36,34 +36,92 @@ body {
   color: var(--text-clr);
 }
 
+/* Global Snackbar Styles - CLEANED UP VERSION */
+
+/* Success snackbar - green */
 .success-snackbar {
-  background-color: var(--success-color) !important;
-  color: #fff !important;
-  text-align: center;
-  font-size: 1em;
-  font-weight: 400;
-  border-radius: 4px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  --mdc-snackbar-container-color: #43a047 !important;
+  --mdc-snackbar-supporting-text-color: white !important;
+  --mat-mdc-snack-bar-button-color: white !important;
 }
 
-.danger-snackbar {
-  background-color: var(--danger-color) !important; /* Red background */
-  color: #fff !important; /* White text */
-  text-align: center;
-  font-size: 1em;
-  font-weight: 400;
-  border-radius: 4px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Error snackbar - red */
+.error-snackbar {
+  --mdc-snackbar-container-color: #d32f2f !important;
+  --mdc-snackbar-supporting-text-color: white !important;
+  --mat-mdc-snack-bar-button-color: white !important;
 }
 
-.mat-snack-bar-container {
-  padding: 16px 24px !important;
+/* Warning snackbar - orange */
+.warning-snackbar {
+  --mdc-snackbar-container-color: #ff9800 !important;
+  --mdc-snackbar-supporting-text-color: white !important;
+  --mat-mdc-snack-bar-button-color: white !important;
+}
+
+/* Info snackbar - blue */
+.info-snackbar {
+  --mdc-snackbar-container-color: #4c6ef5 !important;
+  --mdc-snackbar-supporting-text-color: white !important;
+  --mat-mdc-snack-bar-button-color: white !important;
+}
+
+/* Default snackbar - dark gray */
+.default-snackbar {
+  --mdc-snackbar-container-color: #343a40 !important;
+  --mdc-snackbar-supporting-text-color: white !important;
+  --mat-mdc-snack-bar-button-color: #4c6ef5 !important;
+}
+
+/* Common styling for all snackbars - ADAPTIVE CONTAINER SIZE */
+.mat-mdc-snack-bar-container {
+  margin: 16px !important;
+  min-width: unset !important; /* Remove minimum width */
+  max-width: 80vw !important;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3) !important;
   border-radius: 8px !important;
-  min-width: 250px !important;
+  width: auto !important; /* Allow container to size to content */
+}
+
+/* Better text centering and container sizing */
+.mat-mdc-snack-bar-container .mdc-snackbar__surface {
+  padding: 14px 18px !important;
+  min-width: unset !important;
+  width: auto !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Center the text in the snackbar */
+.mat-mdc-snack-bar-container .mdc-snackbar__label {
+  text-align: center !important;
+  width: auto !important; /* Allow width to adapt to content */
+  font-weight: 500 !important;
+  letter-spacing: 0.2px !important;
+  padding: 0 !important;
+  justify-content: center !important;
+  white-space: nowrap !important; /* Prevent wrapping for short messages */
+  min-width: unset !important;
+}
+
+/* Center the content inside the label */
+.mat-mdc-snack-bar-container .mat-mdc-snack-bar-label {
+  display: flex !important;
+  justify-content: center !important;
+  width: auto !important; /* Allow width to adapt to content */
+  min-width: unset !important;
+}
+
+/* Make sure action buttons are correctly aligned */
+.mat-mdc-snack-bar-container .mat-mdc-snack-bar-actions {
+  justify-content: center !important;
+  padding-top: 6px !important;
+  min-width: unset !important;
+  width: auto !important;
+}
+
+/* Force the snackbar container to wrap its content tightly */
+.mdc-snackbar__surface {
+  display: inline-flex !important;
+  flex-direction: column !important;
 }
