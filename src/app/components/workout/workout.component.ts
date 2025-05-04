@@ -94,6 +94,30 @@ export class WorkoutComponent implements OnInit, AfterViewInit {
   dayMenuOpen: { [day: string]: boolean } = {};
   dayNotes: { [day: string]: string } = {};
 
+  // Add these properties to the component class
+  // Rest Day tracking
+  restDays: { [day: string]: boolean } = {};
+  
+  // Workout session tracking
+  activeWorkoutDay: string | null = null;
+  workoutSessionMinimized: boolean = false;
+  workoutStartTime: Date | null = null;
+  workoutElapsedTime: number = 0;
+  workoutTimerInterval: any = null;
+  
+  // Exercise completion tracking
+  exerciseCompletionStatus: { [exerciseId: number]: boolean } = {};
+  setCompletionStatus: { [key: string]: boolean } = {};
+  
+  // Rest timer
+  restTimerActive: boolean = false;
+  restTimeRemaining: number = 0;
+  restTimerInterval: any = null;
+  restTimerDuration: number = 0;
+  
+  // Workout completion modal
+  showWorkoutCompletionModal: boolean = false;
+
   constructor(
     private genericService: GenericService<any>,
     private router: Router,
@@ -124,6 +148,19 @@ export class WorkoutComponent implements OnInit, AfterViewInit {
         console.error('Error parsing saved day notes', e);
       }
     }
+
+    // Load saved rest days
+    const savedRestDays = localStorage.getItem('restDays');
+    if (savedRestDays) {
+      try {
+        this.restDays = JSON.parse(savedRestDays);
+      } catch (e) {
+        console.error('Error parsing saved rest days', e);
+      }
+    }
+    
+    // Check if there was an active workout session
+    this.restoreWorkoutSession();
   }
   loadExercises(): void {
     this.isLoading = true;
@@ -977,5 +1014,348 @@ export class WorkoutComponent implements OnInit, AfterViewInit {
         behavior: 'smooth'
       });
     });
+  }
+
+  // Rest day methods
+  isRestDay(day: string): boolean {
+    return !!this.restDays[day];
+  }
+  
+  toggleRestDay(day: string): void {
+    if (this.isRestDay(day)) {
+      delete this.restDays[day];
+    } else {
+      this.restDays[day] = true;
+    }
+    
+    // Save to localStorage
+    localStorage.setItem('restDays', JSON.stringify(this.restDays));
+  }
+  
+  // Workout session methods
+  startWorkout(day: string): void {
+    // Don't allow starting a new workout if one is already in progress
+    if (this.activeWorkoutDay) {
+      this.notificationService.warning('You already have an active workout session.');
+      return;
+    }
+    
+    this.activeWorkoutDay = day;
+    this.workoutStartTime = new Date();
+    this.workoutElapsedTime = 0;
+    this.workoutSessionMinimized = false;
+    
+    // Reset completion status
+    this.exerciseCompletionStatus = {};
+    this.setCompletionStatus = {};
+    
+    // Start the workout timer
+    this.startWorkoutTimer();
+    
+    // Prevent body scrolling
+    document.body.style.overflow = 'hidden';
+    
+    // Save current workout state
+    this.saveWorkoutSession();
+  }
+  
+  startWorkoutTimer(): void {
+    if (this.workoutTimerInterval) {
+      clearInterval(this.workoutTimerInterval);
+    }
+    
+    this.workoutTimerInterval = setInterval(() => {
+      if (!this.workoutStartTime) return;
+      
+      const now = new Date();
+      this.workoutElapsedTime = now.getTime() - this.workoutStartTime.getTime();
+      this.saveWorkoutSession();
+    }, 1000);
+  }
+  
+  formatWorkoutTime(ms: number): string {
+    const seconds = Math.floor((ms / 1000) % 60);
+    const minutes = Math.floor((ms / (1000 * 60)) % 60);
+    const hours = Math.floor(ms / (1000 * 60 * 60));
+    
+    const formattedHours = hours > 0 ? `${hours}:` : '';
+    const formattedMinutes = minutes.toString().padStart(2, '0');
+    const formattedSeconds = seconds.toString().padStart(2, '0');
+    
+    return `${formattedHours}${formattedMinutes}:${formattedSeconds}`;
+  }
+  
+  minimizeWorkoutSession(): void {
+    this.workoutSessionMinimized = true;
+    // Allow body scrolling when minimized
+    document.body.style.overflow = 'auto';
+    this.saveWorkoutSession();
+    
+    // Force Angular change detection by using setTimeout
+    setTimeout(() => {
+      console.log('Workout minimized, state:', this.workoutSessionMinimized);
+    }, 0);
+  }
+  
+  maximizeWorkoutSession(): void {
+    this.workoutSessionMinimized = false;
+    // Prevent body scrolling when maximized
+    document.body.style.overflow = 'hidden';
+    this.saveWorkoutSession();
+    
+    // Force Angular change detection by using setTimeout
+    setTimeout(() => {
+      console.log('Workout maximized, state:', this.workoutSessionMinimized);
+    }, 0);
+  }
+  
+  confirmFinishWorkout(): void {
+    this.showWorkoutCompletionModal = true;
+  }
+  
+  finishWorkout(): void {
+    // Stop the workout timer
+    if (this.workoutTimerInterval) {
+      clearInterval(this.workoutTimerInterval);
+      this.workoutTimerInterval = null;
+    }
+    
+    // Save the workout history
+    if (this.activeWorkoutDay && this.user) {
+      const completedExercises = this.getCompletedExercisesCount();
+      const totalExercises = this.getTotalExercisesCount();
+      
+      // Get the final workout duration to save
+      const finalWorkoutDuration = this.workoutElapsedTime;
+      
+      const workoutHistory = {
+        user_uid: this.user.userId,
+        day: this.activeWorkoutDay,
+        date: new Date().toISOString(),
+        duration: finalWorkoutDuration,
+        exercises_completed: completedExercises,
+        total_exercises: totalExercises
+      };
+      
+      this.genericService.create('workout_history', workoutHistory).subscribe(
+        (response) => {
+          console.log('Workout history saved successfully:', response);
+          this.notificationService.success('Workout completed and saved to history!');
+        },
+        (error) => {
+          console.error('Error saving workout history:', error);
+          console.error('Request payload:', workoutHistory);
+          this.notificationService.error('Failed to save workout history');
+        }
+      );
+    }
+    
+    // Reset workout state - do this AFTER saving the history
+    const dayCompleted = this.activeWorkoutDay; // Store the day before resetting
+    this.activeWorkoutDay = null;
+    this.workoutSessionMinimized = false;
+    this.workoutStartTime = null;
+    
+    // Important: Reset this AFTER saving workout history
+    this.workoutElapsedTime = 0; 
+    this.showWorkoutCompletionModal = false;
+    
+    // Re-enable body scrolling
+    document.body.style.overflow = 'auto';
+    
+    // Clear saved workout session
+    localStorage.removeItem('activeWorkoutSession');
+    
+    console.log(`Workout for ${dayCompleted} finished and timer stopped`);
+  }
+  
+  // Exercise & set completion methods
+  toggleExerciseCompletion(exerciseId: number): void {
+    this.exerciseCompletionStatus[exerciseId] = !this.exerciseCompletionStatus[exerciseId];
+    
+    // If marking as complete, also mark all sets as complete
+    const exercise = this.getExerciseById(exerciseId);
+    if (exercise && this.exerciseCompletionStatus[exerciseId]) {
+      exercise.sets?.forEach((_, index) => {
+        this.setCompletionStatus[`${exerciseId}-${index}`] = true;
+      });
+    }
+    
+    this.saveWorkoutSession();
+  }
+  
+  toggleSetCompletion(exerciseId: number, setIndex: number): void {
+    const key = `${exerciseId}-${setIndex}`;
+    this.setCompletionStatus[key] = !this.setCompletionStatus[key];
+    
+    // Check if all sets are completed, if so, mark exercise as completed
+    const exercise = this.getExerciseById(exerciseId);
+    if (exercise && exercise.sets) {
+      const allSetsCompleted = exercise.sets.every((_, i) => 
+        this.setCompletionStatus[`${exerciseId}-${i}`]);
+      
+      if (allSetsCompleted) {
+        this.exerciseCompletionStatus[exerciseId] = true;
+      } else {
+        this.exerciseCompletionStatus[exerciseId] = false;
+      }
+    }
+    
+    this.saveWorkoutSession();
+  }
+  
+  getExerciseById(exerciseId: number): TemplateExercise | null {
+    if (!this.activeWorkoutDay) return null;
+    
+    const exercises = this.getExercisesForDay(this.activeWorkoutDay);
+    return exercises.find(ex => ex.id === exerciseId) || null;
+  }
+  
+  getCompletedExercisesCount(): number {
+    if (!this.activeWorkoutDay) return 0;
+    
+    const exercises = this.getExercisesForDay(this.activeWorkoutDay);
+    return exercises.filter(ex => this.exerciseCompletionStatus[ex.id]).length;
+  }
+  
+  getTotalExercisesCount(): number {
+    if (!this.activeWorkoutDay) return 0;
+    return this.getExercisesForDay(this.activeWorkoutDay).length;
+  }
+  
+  // Rest timer methods
+  startRestTimer(seconds: number): void {
+    if (this.restTimerActive) {
+      this.cancelRestTimer();
+    }
+    
+    this.restTimerActive = true;
+    this.restTimerDuration = seconds;
+    this.restTimeRemaining = seconds;
+    
+    // Play a sound to indicate rest timer started
+    const audio = new Audio('assets/timer-start.mp3');
+    audio.play().catch(err => console.log('Audio play failed:', err));
+    
+    this.restTimerInterval = setInterval(() => {
+      this.restTimeRemaining--;
+      
+      if (this.restTimeRemaining <= 0) {
+        this.finishRestTimer();
+      }
+    }, 1000);
+  }
+  
+  cancelRestTimer(): void {
+    if (this.restTimerInterval) {
+      clearInterval(this.restTimerInterval);
+      this.restTimerInterval = null;
+    }
+    
+    this.restTimerActive = false;
+  }
+  
+  finishRestTimer(): void {
+    this.cancelRestTimer();
+    
+    // Play a sound to indicate rest timer finished
+    const audio = new Audio('assets/timer-end.mp3');
+    audio.play().catch(err => console.log('Audio play failed:', err));
+    
+    // Show notification
+    this.notificationService.info('Rest period completed!');
+  }
+  
+  getRestTimerProgress(): number {
+    if (!this.restTimerActive || this.restTimerDuration === 0) return 0;
+    
+    const progress = (this.restTimeRemaining / this.restTimerDuration) * 283;
+    return 283 - progress; // SVG circle animation works in reverse
+  }
+  
+  formatRestTime(seconds: number): string {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+  
+  promptCustomRestTimer(): void {
+    const seconds = prompt('Enter rest time in seconds:');
+    if (seconds === null) return;
+    
+    const secondsNum = parseInt(seconds, 10);
+    if (isNaN(secondsNum) || secondsNum <= 0) {
+      this.notificationService.warning('Please enter a valid positive number.');
+      return;
+    }
+    
+    this.startRestTimer(secondsNum);
+  }
+  
+  // Session persistence methods
+  saveWorkoutSession(): void {
+    if (!this.activeWorkoutDay) return;
+    
+    const session = {
+      day: this.activeWorkoutDay,
+      startTime: this.workoutStartTime?.getTime(),
+      elapsedTime: this.workoutElapsedTime,
+      minimized: this.workoutSessionMinimized,
+      exerciseStatus: this.exerciseCompletionStatus,
+      setStatus: this.setCompletionStatus
+    };
+    
+    localStorage.setItem('activeWorkoutSession', JSON.stringify(session));
+  }
+  
+  restoreWorkoutSession(): void {
+    const savedSession = localStorage.getItem('activeWorkoutSession');
+    if (!savedSession) return;
+    
+    try {
+      const session = JSON.parse(savedSession);
+      
+      this.activeWorkoutDay = session.day;
+      this.workoutSessionMinimized = session.minimized;
+      this.exerciseCompletionStatus = session.exerciseStatus || {};
+      this.setCompletionStatus = session.setStatus || {};
+      
+      if (session.startTime) {
+        this.workoutStartTime = new Date(session.startTime);
+        this.workoutElapsedTime = session.elapsedTime || 0;
+        this.startWorkoutTimer();
+      }
+      
+      // Set body scroll state based on minimized status
+      document.body.style.overflow = this.workoutSessionMinimized ? 'auto' : 'hidden';
+      
+      // Add or remove class based on minimized state
+      if (this.workoutSessionMinimized) {
+        document.body.classList.add('workout-session-minimized');
+      } else {
+        document.body.classList.remove('workout-session-minimized');
+      }
+      
+    } catch (e) {
+      console.error('Error restoring workout session', e);
+      localStorage.removeItem('activeWorkoutSession');
+    }
+  }
+  
+  // Clean up timers when component is destroyed
+  ngOnDestroy(): void {
+    // Make sure to clear any ongoing timers
+    if (this.workoutTimerInterval) {
+      clearInterval(this.workoutTimerInterval);
+      this.workoutTimerInterval = null;
+    }
+    if (this.restTimerInterval) {
+      clearInterval(this.restTimerInterval);
+      this.restTimerInterval = null;
+    }
+    
+    // Save any active session data before destroying
+    this.saveWorkoutSession();
   }
 }

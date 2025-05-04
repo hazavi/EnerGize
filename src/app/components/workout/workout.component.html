@@ -19,7 +19,9 @@
         <!-- Week Calendar View - Now with horizontal scroll -->
         <div class="week-calendar">
             <!-- Day Cards for Each Day of the Week -->
-            <div *ngFor="let day of weekDays" class="day-card" [id]="'day-' + day" (click)="openDayZoom(day)">
+            <div *ngFor="let day of weekDays" class="day-card" [id]="'day-' + day" 
+                 [class.rest-day]="isRestDay(day)"
+                 (click)="openDayZoom(day)">
                 <!-- Day Header with Menu and Note -->
                 <div class="day-header" [ngClass]="{'today': isToday(day)}">
                     <div class="day-header-top">
@@ -33,12 +35,19 @@
 
                         <!-- Day menu dropdown -->
                         <div class="day-menu-dropdown" *ngIf="dayMenuOpen[day]" (click)="$event.stopPropagation()">
-                            <button class="menu-item"
-                                (click)="addExerciseToTemplate(getDayTemplate(day)); $event.stopPropagation()">
+                            <button class="menu-item" *ngIf="!isRestDay(day)" 
+                                    (click)="startWorkout(day); $event.stopPropagation()">
+                                <i class="fas fa-play-circle"></i> Start Workout
+                            </button>
+                            <button class="menu-item" 
+                                    (click)="addExerciseToTemplate(getDayTemplate(day)); $event.stopPropagation()">
                                 <i class="fas fa-plus"></i> Add Exercise
                             </button>
                             <button class="menu-item" (click)="editDayNote(day); $event.stopPropagation()">
                                 <i class="fas fa-pen"></i> Edit Note
+                            </button>
+                            <button class="menu-item" (click)="toggleRestDay(day); $event.stopPropagation()">
+                                <i class="fas fa-bed"></i> {{ isRestDay(day) ? 'Remove Rest Day' : 'Mark as Rest Day' }}
                             </button>
                         </div>
                     </div>
@@ -232,4 +241,140 @@
     <app-exercise-modal [isOpen]="isExerciseModalOpen" [selectedTemplate]="selectedTemplate"
         [templateExercises]="templateExercises" (close)="closeExerciseModal()" (save)="saveTemplateExercises($event)">
     </app-exercise-modal>
+</div>
+
+<!-- Active Workout Session Overlay -->
+<div class="workout-session-overlay" *ngIf="activeWorkoutDay" [class.minimized]="workoutSessionMinimized">
+    <div class="workout-session-container">
+        <!-- Header with timer and controls -->
+        <div class="workout-session-header">
+            <div class="workout-session-info">
+                <h2>{{ activeWorkoutDay }} Workout</h2>
+                <div class="workout-timer">
+                    <i class="fas fa-stopwatch"></i>
+                    <span class="timer">{{ formatWorkoutTime(workoutElapsedTime) }}</span>
+                </div>
+            </div>
+            <div class="workout-session-controls">
+                <button class="btn btn-minimize" (click)="minimizeWorkoutSession()" title="Minimize">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button class="btn btn-finish" (click)="confirmFinishWorkout()">
+                    <i class="fas fa-check"></i> Finish
+                </button>
+            </div>
+        </div>
+
+        <!-- Workout Content -->
+        <div class="workout-session-content">
+            <!-- Exercises List -->
+            <div class="workout-session-exercises">
+                <div *ngFor="let exercise of getExercisesForDay(activeWorkoutDay); let i = index" 
+                     class="workout-session-exercise" 
+                     [class.completed]="exerciseCompletionStatus[exercise.id]">
+                    <div class="exercise-session-header">
+                        <div class="exercise-session-info">
+                            <img [src]="getExerciseThumbnail(exercise.exercise_id)" 
+                                alt="{{ getExerciseName(exercise.exercise_id) }}" 
+                                class="exercise-session-img" 
+                                (error)="handleImageError($event)">
+                            <div>
+                                <span class="exercise-session-name">{{ getExerciseName(exercise.exercise_id) }}</span>
+                                <span class="exercise-session-sets">{{ (exercise.sets?.length ?? 0) }} sets</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-toggle-complete" 
+                                (click)="toggleExerciseCompletion(exercise.id)">
+                            <i class="fas" [class.fa-check-circle]="exerciseCompletionStatus[exercise.id]" 
+                               [class.fa-circle]="!exerciseCompletionStatus[exercise.id]"></i>
+                        </button>
+                    </div>
+
+                    <!-- Sets for this exercise -->
+                    <div class="exercise-session-sets-list" *ngIf="!exerciseCompletionStatus[exercise.id]">
+                        <div *ngFor="let set of exercise.sets; let j = index" class="exercise-session-set"
+                             [class.completed]="setCompletionStatus[exercise.id + '-' + j]">
+                            <span class="set-number">Set {{ j + 1 }}</span>
+                            <span class="set-details">{{ set.reps }} reps • {{ set.weight }} {{ set.weightUnit }}</span>
+                            <button class="btn btn-complete-set" (click)="toggleSetCompletion(exercise.id, j)">
+                                <i class="fas" [class.fa-check-circle]="setCompletionStatus[exercise.id + '-' + j]" 
+                                  [class.fa-circle]="!setCompletionStatus[exercise.id + '-' + j]"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Rest Timer Section -->
+            <div class="rest-timer-section">
+                <div class="rest-timer-display" *ngIf="restTimerActive">
+                    <div class="rest-timer-circle">
+                        <svg viewBox="0 0 100 100" class="rest-timer-progress">
+                            <circle cx="50" cy="50" r="45" class="rest-timer-base" />
+                            <circle cx="50" cy="50" r="45" [style.stroke-dashoffset]="getRestTimerProgress()" 
+                                    class="rest-timer-elapsed" />
+                        </svg>
+                        <div class="rest-timer-text">{{ formatRestTime(restTimeRemaining) }}</div>
+                    </div>
+                    <button class="btn btn-cancel-rest" (click)="cancelRestTimer()">
+                        <i class="fas fa-times"></i> Skip
+                    </button>
+                </div>
+                <div class="rest-timer-buttons" *ngIf="!restTimerActive">
+                    <button class="btn btn-rest" (click)="startRestTimer(30)">
+                        <i class="fas fa-stopwatch"></i> 30s
+                    </button>
+                    <button class="btn btn-rest" (click)="startRestTimer(60)">
+                        <i class="fas fa-stopwatch"></i> 1m
+                    </button>
+                    <button class="btn btn-rest" (click)="startRestTimer(120)">
+                        <i class="fas fa-stopwatch"></i> 2m
+                    </button>
+                    <button class="btn btn-rest" (click)="startRestTimer(180)">
+                        <i class="fas fa-stopwatch"></i> 3m
+                    </button>
+                    <button class="btn btn-rest" (click)="startRestTimer(300)">
+                        <i class="fas fa-stopwatch"></i> 5m
+                    </button>
+                    <button class="btn btn-custom-rest" (click)="promptCustomRestTimer()">
+                        <i class="fas fa-clock"></i> Custom
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Minimized Workout Indicator - move outside the overlay so it's always visible when minimized -->
+<div class="minimized-workout-indicator" *ngIf="activeWorkoutDay && workoutSessionMinimized" (click)="maximizeWorkoutSession()">
+    <div class="minimized-workout-info">
+        <i class="fas fa-dumbbell"></i>
+        <span>{{ activeWorkoutDay }} - {{ formatWorkoutTime(workoutElapsedTime) }}</span>
+    </div>
+    <button class="btn btn-finish-mini" (click)="confirmFinishWorkout(); $event.stopPropagation()" title="Finish Workout">
+        <i class="fas fa-check"></i>
+    </button>
+</div>
+
+<!-- Workout Completion Modal -->
+<div class="workout-completion-modal" *ngIf="showWorkoutCompletionModal">
+    <div class="workout-completion-container">
+        <div class="completion-header">
+            <h2>Workout Complete!</h2>
+            <i class="fas fa-trophy"></i>
+        </div>
+        <div class="completion-stats">
+            <div class="stat-item">
+                <span class="stat-label">Duration</span>
+                <span class="stat-value">{{ formatWorkoutTime(workoutElapsedTime) }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Exercises</span>
+                <span class="stat-value">{{ getCompletedExercisesCount() }}/{{ getTotalExercisesCount() }}</span>
+            </div>
+        </div>
+        <div class="completion-actions">
+            <button class="btn btn-primary btn-lg" (click)="finishWorkout()">Done</button>
+        </div>
+    </div>
 </div>

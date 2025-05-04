@@ -116,6 +116,32 @@ body {
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
+/* Rest Day Styling */
+.day-card.rest-day {
+  position: relative;
+  overflow: hidden;
+}
+
+.day-card.rest-day::after {
+  content: "Rest Day";
+  position: absolute;
+  top: 60%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-30deg);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.12);
+  letter-spacing: 2px;
+  white-space: nowrap;
+  pointer-events: none;
+  text-transform: uppercase;
+  z-index: 1;
+}
+
+.day-card.rest-day .workout-list {
+  opacity: 0.5;
+}
+
 /* Day header */
 .day-header {
   padding: 1rem 1.25rem;
@@ -1126,4 +1152,555 @@ body.dragging * {
   .tip-text {
     font-size: 14px;
   }
+}
+
+/* Active Workout Session */
+.workout-session-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(18, 20, 24, 0.98);
+  z-index: 2000;
+  overflow-y: auto;
+  animation: fade-in 0.2s ease-out;
+}
+
+.workout-session-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.workout-session-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 20px;
+  background: linear-gradient(to right, #31343a, #282c34);
+  border-radius: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.workout-session-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.workout-session-info h2 {
+  font-size: 1.5rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+.workout-timer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.2rem;
+  font-weight: 500;
+  background: rgba(76, 110, 245, 0.15);
+  padding: 8px 16px;
+  border-radius: 12px;
+  color: #4c6ef5;
+}
+
+.workout-timer i {
+  color: #4c6ef5;
+}
+
+.workout-session-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-minimize {
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #e9ecef;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-minimize:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-finish {
+  padding: 10px 18px;
+  background: #4c6ef5;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-finish:hover {
+  background: #3b5bdb;
+  transform: translateY(-2px);
+}
+
+/* Workout Session Content */
+.workout-session-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-bottom: 40px;
+}
+
+.workout-session-exercises {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.workout-session-exercise {
+  background: #2a2e35;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  transition: all 0.3s;
+}
+
+.workout-session-exercise.completed {
+  background: linear-gradient(to right, rgba(76, 110, 245, 0.1), rgba(76, 110, 245, 0.05));
+  border-left: 3px solid #4c6ef5;
+}
+
+.exercise-session-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.exercise-session-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.exercise-session-img {
+  width: 45px;
+  height: 45px;
+  border-radius: 8px;
+  object-fit: cover;
+  background-color: white;
+  padding: 2px;
+}
+
+.exercise-session-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #e9ecef;
+  display: block;
+}
+
+.exercise-session-sets {
+  font-size: 0.85rem;
+  color: #adb5bd;
+  display: block;
+  margin-top: 4px;
+}
+
+.btn-toggle-complete {
+  background: transparent;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: #adb5bd;
+  transition: all 0.2s;
+  padding: 8px;
+}
+
+.workout-session-exercise.completed .btn-toggle-complete {
+  color: #4c6ef5;
+}
+
+.btn-toggle-complete:hover {
+  color: #4c6ef5;
+}
+
+/* Sets List */
+.exercise-session-sets-list {
+  padding: 12px 16px 16px;
+}
+
+.exercise-session-set {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+  border-left: 3px solid transparent;
+}
+
+.exercise-session-set.completed {
+  border-left-color: #4c6ef5;
+  background: rgba(76, 110, 245, 0.08);
+}
+
+.set-number {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: #e9ecef;
+}
+
+.set-details {
+  font-size: 0.9rem;
+  color: #adb5bd;
+}
+
+.btn-complete-set {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #adb5bd;
+  transition: all 0.2s;
+}
+
+.exercise-session-set.completed .btn-complete-set {
+  color: #4c6ef5;
+}
+
+.btn-complete-set:hover {
+  color: #4c6ef5;
+}
+
+/* Rest Timer Section */
+.rest-timer-section {
+  background: #31343a;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+.rest-timer-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.rest-timer-circle {
+  position: relative;
+  width: 140px;
+  height: 140px;
+}
+
+.rest-timer-progress {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.rest-timer-base {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 8;
+}
+
+.rest-timer-elapsed {
+  fill: none;
+  stroke: #4c6ef5;
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: 283; /* 2 * PI * 45 */
+  transition: stroke-dashoffset 1s linear;
+}
+
+.rest-timer-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: white;
+}
+
+.btn-cancel-rest {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 24px;
+  padding: 10px 24px;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.btn-cancel-rest:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.rest-timer-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btn-rest {
+  background: rgba(76, 110, 245, 0.2);
+  color: white;
+  border: none;
+  border-radius: 24px;
+  padding: 12px 24px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+}
+
+.btn-rest:hover {
+  background: rgba(76, 110, 245, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn-custom-rest {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: none;
+  border-radius: 24px;
+  padding: 12px 24px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+}
+
+.btn-custom-rest:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Improved styling for the finish button in minimized workout indicator */
+.btn-finish-mini {
+  background: #4c6ef5;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.btn-finish-mini:hover {
+  background: #3b5bdb;
+  transform: scale(1.1);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+.btn-finish-mini i {
+  font-size: 1rem;
+}
+
+/* Also improve the overall minimized indicator */
+.minimized-workout-indicator {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2a2e35;
+  border-radius: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px 10px 20px; /* Adjust right padding to be smaller */
+  z-index: 2100; /* Ensure high z-index */
+  cursor: pointer;
+  border: 2px solid #4c6ef5;
+  transition: all 0.2s;
+  min-width: 240px;
+  gap: 12px; /* Add some gap between elements */
+}
+
+.minimized-workout-indicator:hover {
+  background: #31343a;
+  transform: translateX(-50%) translateY(-2px);
+}
+
+.minimized-workout-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 500;
+}
+
+.minimized-workout-info i {
+  color: #4c6ef5;
+  font-size: 1.2rem;
+}
+
+/* Workout Completion Modal */
+.workout-completion-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(6px);
+  z-index: 2100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fade-in 0.3s;
+}
+
+.workout-completion-container {
+  background: #2a2e35;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 400px;
+  padding: 30px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  animation: zoom-in 0.3s;
+}
+
+.completion-header {
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.completion-header h2 {
+  font-size: 1.8rem;
+  margin: 0;
+  color: white;
+}
+
+.completion-header i {
+  font-size: 3rem;
+  color: #ffc107;
+  animation: trophy-glow 2s infinite alternate;
+}
+
+@keyframes trophy-glow {
+  from {
+    text-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+    transform: scale(1);
+  }
+  to {
+    text-shadow: 0 0 20px rgba(255, 193, 7, 0.8);
+    transform: scale(1.1);
+  }
+}
+
+.completion-stats {
+  display: flex;
+  justify-content: space-around;
+  margin: 30px 0;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #adb5bd;
+}
+
+.stat-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: white;
+}
+
+.completion-actions {
+  margin-top: 30px;
+}
+
+.btn-lg {
+  padding: 14px 40px;
+  font-size: 1.1rem;
+  border-radius: 30px;
+}
+
+@media (max-width: 768px) {
+  .workout-session-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .rest-timer-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .btn-rest, .btn-custom-rest {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Active Workout Session */
+.workout-session-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(18, 20, 24, 0.98);
+  z-index: 2000;
+  overflow-y: auto;
+  animation: fade-in 0.2s ease-out;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Add this to properly hide the overlay when minimized */
+.workout-session-overlay.minimized {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
