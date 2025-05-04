@@ -83,7 +83,7 @@ export class LoginComponent {
         this.errorMessage = '';
         this.successMessage = 'You have successfully logged in!';
         this.isLoading = false; // Stop loading
-        this.router.navigate(['/home']).then(() => {
+        this.router.navigate(['/workout']).then(() => {
           window.location.reload();
         });
 
