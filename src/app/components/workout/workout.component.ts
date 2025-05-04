@@ -431,30 +431,30 @@ export class WorkoutComponent implements OnInit, AfterViewInit {
       console.error('No template selected.');
       return;
     }
-
+  
     const templateId = this.selectedTemplate.id;
-
+  
     // Check current exercise count + new exercises against the limit
     const currentCount = this.templateExercisesMap[templateId]?.length || 0;
     const newExercisesCount = templateExercises.filter(
       (ex) => !ex.id || ex.id === 0
     ).length;
-
+  
     if (currentCount + newExercisesCount > 10) {
       this.notificationService.warning(
         `You can only have 10 exercises per template. (${currentCount} existing + ${newExercisesCount} new)`
       );
       return;
     }
-
-    // Rest of the method remains the same
+  
     // Check if any exercise is being edited (has an ID > 0)
     const existingExercises = templateExercises.filter((ex) => ex.id > 0);
-    const newExercises = templateExercises.filter(
-      (ex) => !ex.id || ex.id === 0
-    );
-
-    // Handle updates for existing exercises
+    const newExercises = templateExercises.filter((ex) => !ex.id || ex.id === 0);
+  
+    // Show loading indicator
+    this.isLoading = true;
+  
+    // Handle updates for existing exercises and creation for new ones
     const updatePromises = existingExercises.map(
       (exercise) =>
         new Promise<TemplateExercise>((resolve, reject) => {
@@ -464,28 +464,18 @@ export class WorkoutComponent implements OnInit, AfterViewInit {
               exercise_id: exercise.exercise_id,
               sets: exercise.sets,
             })
-            .subscribe(
-              (updatedExercise: TemplateExercise) => {
-                // Update in the local map
-                const index = this.templateExercisesMap[templateId]?.findIndex(
-                  (e) => e.id === exercise.id
-                );
-                if (index !== -1) {
-                  this.templateExercisesMap[templateId][index] =
-                    updatedExercise;
-                }
-                resolve(updatedExercise);
-              },
-              (error) => reject(error)
-            );
+            .subscribe({
+              next: (updatedExercise: TemplateExercise) => resolve(updatedExercise),
+              error: (error) => reject(error)
+            });
         })
     );
-
+  
     // Handle creation for new exercises
     const createPromises = newExercises.map(
       (exercise, index) =>
         new Promise<TemplateExercise>((resolve, reject) => {
-          // Get the next order value (current max order + 1)
+          // Get the next order value
           const currentExercises = this.templateExercisesMap[templateId] || [];
           const maxOrder =
             currentExercises.length > 0
@@ -495,37 +485,45 @@ export class WorkoutComponent implements OnInit, AfterViewInit {
                   )
                 )
               : -1;
-
+  
           this.genericService
             .create('templateexercise', {
               template_id: templateId,
               exercise_id: exercise.exercise_id,
               sets: exercise.sets,
-              order: maxOrder + index + 1, // Add to the end with proper ordering
+              order: maxOrder + index + 1,
             })
-            .subscribe(
-              (createdExercise: TemplateExercise) => resolve(createdExercise),
-              (error) => reject(error)
-            );
+            .subscribe({
+              next: (createdExercise: TemplateExercise) => resolve(createdExercise),
+              error: (error) => reject(error)
+            });
         })
     );
-
+  
     // Wait for all operations to complete
     Promise.all([...updatePromises, ...createPromises])
       .then((exercises) => {
-        // Only add newly created exercises to the map (updates are already handled)
-        if (newExercises.length > 0) {
-          const createdExercises = exercises.slice(existingExercises.length);
-          this.templateExercisesMap[templateId] = [
-            ...(this.templateExercisesMap[templateId] || []),
-            ...createdExercises,
-          ];
-        }
-        console.log('Template exercises saved successfully');
+        // Display success message
+        this.notificationService.success(
+          `Successfully ${newExercises.length > 0 ? 'added' : 'updated'} exercises to template`
+        );
+        
+        // Close the modal
+        this.isExerciseModalOpen = false;
+        this.selectedTemplate = null;
+        
+        // Refresh page to show new exercises
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       })
       .catch((error) => {
         console.error('Error saving template exercises:', error);
-        alert('Failed to save exercises to template. Please try again.');
+        this.notificationService.error('Failed to save exercises to template. Please try again.');
+      })
+      .finally(() => {
+        // Hide loading indicator
+        this.isLoading = false;
       });
   }
 
