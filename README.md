@@ -28,4 +28,7 @@ EnerGize is a workout planning and tracking application designed to help users o
 - **Frontend**: Angular framework with TypeScript  
 - **Backend**: Supabase & PostgreSQL
 
-
+## User Testing Login
+For testing purposes, you can use the following credentials:
+- **Email**: `test@energize.com`
+- **Password**: `4GA46Al0`
